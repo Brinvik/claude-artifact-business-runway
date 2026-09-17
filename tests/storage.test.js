@@ -241,5 +241,37 @@ module.exports = async function run(report) {
     assert.ok(desc && desc[1].length <= 200, 'skill description must be 200 characters or less');
   });
 
+  await test('demo view for a website: example numbers, nothing stored, no import', async () => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    const errors = []; page.on('pageerror', e => errors.push(String(e)));
+    await page.route(/fonts\.(googleapis|gstatic)\.com/, r => r.abort());
+    await page.route(/^https:\/\/runway\.test\/.*/, r => r.fulfill({ status: 200, contentType: 'text/html', body: HTML }));
+    await page.goto(ORIGIN + '?demo'); await page.waitForTimeout(600);
+    assert.notStrictEqual(await page.$eval('#verdictMonths', e => e.textContent), '\u2013');
+    assert.strictEqual(await page.$eval('#demoOff', e => e.hidden), true);
+    assert.strictEqual(await page.$eval('#dataPanel', e => e.hidden), true);
+    await page.fill('#bankInput', '99999'); await page.dispatchEvent('#bankInput', 'input'); await page.waitForTimeout(1200);
+    const stored = await page.evaluate(async () => ({ ls: localStorage.length, dbs: indexedDB.databases ? (await indexedDB.databases()).length : 0 }));
+    assert.deepStrictEqual(stored, { ls: 0, dbs: 0 });
+    assert.deepStrictEqual(errors, []);
+    await ctx.close();
+  });
+
+  await test('demo view works inside a sandboxed iframe', async () => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    const errors = []; page.on('pageerror', e => errors.push(String(e)));
+    await page.route(/fonts\.(googleapis|gstatic)\.com/, r => r.abort());
+    await page.route('https://site.test/', r => r.fulfill({ status: 200, contentType: 'text/html', body: '<iframe id="f" sandbox="allow-scripts" src="https://runway.test/?demo" style="width:1000px;height:800px"></iframe>' }));
+    await page.route(/^https:\/\/runway\.test\/.*/, r => r.fulfill({ status: 200, contentType: 'text/html', body: HTML }));
+    await page.goto('https://site.test/'); await page.waitForTimeout(1200);
+    const frame = page.frames().find(f => f.url().startsWith('https://runway.test/'));
+    assert.ok(frame, 'frame loaded');
+    assert.match(await frame.$eval('#verdictText', e => e.textContent), /months of runway/);
+    assert.deepStrictEqual(errors, []);
+    await ctx.close();
+  });
+
   await browser.close();
 };

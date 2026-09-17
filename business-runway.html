@@ -2483,7 +2483,15 @@ input[type=text],input[type=month]{font-family:"IBM Plex Mono",monospace;font-si
     if(hasChatStore) return useKv(chatKv(), "chat");
     return useKv(browserKv(), "browser");
   }
-  if(window.claude && typeof window.claude.use === "function"){
+  /* demo-only view, for embedding a live demo on a website: example numbers, no storage, no import */
+  var DEMO_ONLY = /(^|[?&#])demo(=1)?($|&)/.test(String(location.search || "") + String(location.hash || ""));
+  if(DEMO_ONLY){
+    REAL.loaded = true; clearTimeout(bootTimer);
+    $("demoOff").hidden = true; $("dataPanel").hidden = true; $("onboard").hidden = true;
+    $("storeNote").textContent = "Demo with example numbers. Nothing is saved.";
+    $("footStore").textContent = "Demo with example numbers. Nothing you type is saved or sent anywhere.";
+    setDemo(true);
+  } else if(window.claude && typeof window.claude.use === "function"){
     window.claude.use("downloads").then(function(x){ dl = x; syncDlButtons(); }).catch(function(){});
     window.claude.use("db").then(function(db){
       if(!db){ startLocal(); return; }
