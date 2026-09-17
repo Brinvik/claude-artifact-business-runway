@@ -1,0 +1,11 @@
+{
+  "name": "business-runway-tests",
+  "private": true,
+  "description": "Browser and script tests for the Business Runway kit",
+  "scripts": {
+    "test": "node run-all.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.0"
+  }
+}
