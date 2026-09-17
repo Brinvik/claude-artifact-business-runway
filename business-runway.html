@@ -525,6 +525,14 @@ input[type=text],input[type=month]{font-family:"IBM Plex Mono",monospace;font-si
 .vlabel.private{background:var(--alarm);color:#fff}
 @media(max-width:520px){.wrap{padding:20px 16px 56px}.panel{padding:16px}}
 .small{font-size:12.5px;color:var(--ink-3)}
+.datagrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:22px}
+.datacol .ctl{margin-top:10px}
+.datacol textarea{width:100%;font-family:"IBM Plex Mono",monospace;font-size:12px;border:1px solid var(--line);border-radius:3px;padding:8px;background:var(--surface);color:var(--ink);resize:vertical}
+.dh{font-size:15px;margin:0 0 4px}
+.btnrow{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+.rampbtn.ghost{background:transparent}
+.impres{margin-top:12px;font-size:13px;line-height:1.5;border-left:3px solid var(--line);padding:6px 10px}
+.impres.bad{border-color:#C0392B}
 </style>
 
 <div class="wrap">
@@ -567,7 +575,7 @@ input[type=text],input[type=month]{font-family:"IBM Plex Mono",monospace;font-si
     <p class="small" style="margin:6px 0 0">Three ways to start:</p>
     <ol>
       <li><strong>Look first.</strong> <button type="button" class="rampbtn" id="demoOn">Show it with example numbers</button> Nothing is saved.</li>
-      <li><strong>Let Claude fill it.</strong> Go back to the Claude chat where you set up this page and say "update my runway". Setting it up for the first time? Start a new chat with the setup prompt from the kit.</li>
+      <li><strong>Let Claude fill it.</strong> <span id="obClaude">Go back to the Claude chat where you set up this page and say "update my runway". Setting it up for the first time? Start a new chat with the setup prompt from the kit.</span></li>
       <li><strong>Type the basics yourself</strong> in Settings at the bottom of the page. Bank balance, currency and your subscriptions are enough for a first runway.</li>
     </ol>
   </section>
@@ -830,6 +838,29 @@ input[type=text],input[type=month]{font-family:"IBM Plex Mono",monospace;font-si
     </details>
   </section>
 
+  <section class="panel" id="dataPanel">
+    <div class="panel-head"><div><h2>Your data</h2>
+      <div class="panel-note" id="storeNote">Checking where this page can save.</div></div></div>
+    <div class="datagrid">
+      <div class="datacol">
+        <h3 class="dh">Import from Claude</h3>
+        <p class="small">Claude gives you a file called <code>business-runway-import.json</code>. Pick it here, or paste its text. You see what is in it before anything is saved.</p>
+        <div class="ctl"><label for="impFile">File from Claude</label><input type="file" id="impFile" accept=".json,application/json"></div>
+        <div class="ctl"><label for="impText">Or paste the text</label><textarea id="impText" rows="3" spellcheck="false" placeholder='{"format": "business-runway", ...}'></textarea></div>
+        <div class="btnrow"><button type="button" class="rampbtn" id="impCheck">Check it</button></div>
+        <div class="impres" id="impResult" role="status" aria-live="polite" hidden></div>
+        <div class="btnrow" id="impConfirmRow" hidden><button type="button" class="rampbtn" id="impGo">Import now</button> <button type="button" class="rampbtn ghost" id="impCancel">Cancel</button></div>
+      </div>
+      <div class="datacol">
+        <h3 class="dh">Back up and update</h3>
+        <p class="small">Download a backup now and then. When you ask Claude to update your runway outside Cowork, give it the short version first, so it knows what is already here.</p>
+        <div class="btnrow"><button type="button" class="rampbtn" id="expFull">Download a backup</button> <button type="button" class="rampbtn" id="expShort">Copy the short version for Claude</button></div>
+        <textarea id="expBox" rows="3" readonly hidden aria-label="Exported data"></textarea>
+        <div class="small" id="expNote" role="status" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
   <section class="panel" id="settingsPanel">
     <div class="panel-head"><div><h2>Settings</h2>
       <div class="panel-note">Claude fills these during setup. You can change them here any time. Rates are yours to check: this page does not know your local tax rules, so ask your accountant.</div></div></div>
@@ -851,7 +882,7 @@ input[type=text],input[type=month]{font-family:"IBM Plex Mono",monospace;font-si
     <div class="small" id="fxNote" style="margin-top:10px"></div>
   </section>
 
-  <div class="foot">Business Runway, a free template from Brinvik. Numbers are a planning aid, not accounting or tax advice. Your data stays in this artifact's own store and is never sent to Brinvik.</div>
+  <div class="foot">Business Runway, a free template from Brinvik. Numbers are a planning aid, not accounting or tax advice. <span id="footStore">Your data stays where this page saves it and is never sent to Brinvik.</span></div>
 </div>
 
 <div class="viz-tip" id="vizTip" role="status" aria-live="polite" hidden></div>
@@ -1174,6 +1205,7 @@ input[type=text],input[type=month]{font-family:"IBM Plex Mono",monospace;font-si
       return Promise.resolve();
     }
     if(!dbRef) return Promise.reject(new Error("no store"));
+    if(col !== "settings" && col !== "files"){ patch = Object.assign({}, patch, {userEditedAt: new Date().toISOString()}); }
     return merge === "set" ? dbRef.doc(path).set(patch) : dbRef.doc(path).update(patch);
   }
 
@@ -2083,20 +2115,334 @@ input[type=text],input[type=month]{font-family:"IBM Plex Mono",monospace;font-si
     paintSubs(); paintOwed(); paintTriage(); paintQuestions(); render(); refreshNumbers(); syncDlButtons();
   }
 
+  /* ================= import from Claude, backup ================= */
+  var IMPORT_COLS = {receipts:"receipts", subscriptions:"subs", receivables:"owed", questions:"questions"};
+  var USER_FIELDS = {
+    receipts: ["status","needsDecision","decidedAt","paid","paidAt","qaPicks","qaPickedAt","qaAccepted","qaAcceptedAt"],
+    subscriptions: ["active"], receivables: ["paid","paidAt"], questions: ["answer","answeredAt"]
+  };
+  var MAX_IMPORT_CHARS = 15000000, MAX_DOCS = 5000;
+  function cleanValue(v, key, depth){
+    if(v === null || typeof v === "boolean") return v;
+    if(typeof v === "number") return isFinite(v) ? v : undefined;
+    if(typeof v === "string"){
+      if(key === "thumb") return safeImg(v) && v.length <= 300000 ? v : undefined;
+      return v.length <= 4000 ? v : v.slice(0, 4000);
+    }
+    if(depth >= 4) return undefined;
+    if(Array.isArray(v)) return v.slice(0, 200).map(function(x){ var c = cleanValue(x, "", depth+1); return c === undefined ? null : c; });
+    if(typeof v === "object") return cleanObj(v, depth+1);
+    return undefined;
+  }
+  function cleanObj(o, depth){
+    var out = {};
+    if(!o || typeof o !== "object" || Array.isArray(o)) return out;
+    Object.keys(o).slice(0, 80).forEach(function(k){
+      if(!/^[A-Za-z][A-Za-z0-9_]{0,40}$/.test(k) || k === "constructor" || k === "prototype") return;
+      var c = cleanValue(o[k], k, depth||0); if(c !== undefined) out[k] = c;
+    });
+    return out;
+  }
+  function parseImport(text){
+    if(typeof text !== "string" || !text.trim()) throw new Error("There is nothing to import.");
+    if(text.length > MAX_IMPORT_CHARS) throw new Error("The file is larger than 15 MB. Ask Claude to leave out the receipt pictures.");
+    var raw;
+    try { raw = JSON.parse(text); } catch(e){ throw new Error("This is not a Business Runway file. The text could not be read as JSON."); }
+    if(!raw || typeof raw !== "object" || Array.isArray(raw) || raw.format !== "business-runway") throw new Error("This is not a Business Runway file. It should start with \"format\": \"business-runway\".");
+    if(num(raw.version) !== 1) throw new Error("This file is made for a newer version of the page. Download the latest page from the kit.");
+    var out = {counts:{}, skipped:0, cols:{}};
+    Object.keys(IMPORT_COLS).forEach(function(col){
+      var src = raw[col], docs = {};
+      if(src && typeof src === "object" && !Array.isArray(src)){
+        var ids = Object.keys(src);
+        if(ids.length > MAX_DOCS) throw new Error("Too many " + col + " in one file (" + ids.length + "). Split it into smaller files.");
+        ids.forEach(function(id){
+          if(!/^[A-Za-z0-9][A-Za-z0-9._-]{0,119}$/.test(id) || !src[id] || typeof src[id] !== "object" || Array.isArray(src[id])){ out.skipped++; return; }
+          docs[id] = cleanObj(src[id], 0);
+        });
+      }
+      out.cols[col] = docs; out.counts[col] = Object.keys(docs).length;
+    });
+    out.config = raw.config && typeof raw.config === "object" && !Array.isArray(raw.config) ? cleanObj(raw.config, 0) : null;
+    out.plan = raw.plan && typeof raw.plan === "object" && !Array.isArray(raw.plan) ? cleanObj(raw.plan, 0) : null;
+    return out;
+  }
+  function importPlan(parsed){
+    var fresh = 0, updated = 0, kept = 0;
+    Object.keys(IMPORT_COLS).forEach(function(col){
+      var have = REAL[IMPORT_COLS[col]] || {}, docs = parsed.cols[col];
+      Object.keys(docs).forEach(function(id){
+        if(!have[id]) fresh++; else if(have[id].userEditedAt) kept++; else updated++;
+      });
+    });
+    return {fresh:fresh, updated:updated, kept:kept};
+  }
+  function mergeDoc(col, existing, incoming){
+    if(!existing || !existing.userEditedAt) return incoming;
+    var out = Object.assign({}, incoming);
+    USER_FIELDS[col].forEach(function(f){ if(Object.prototype.hasOwnProperty.call(existing, f)) out[f] = existing[f]; else delete out[f]; });
+    out.userEditedAt = existing.userEditedAt;
+    return out;
+  }
+  async function runImport(parsed){
+    if(!dbRef) throw new Error("This page is not ready to save yet.");
+    var writes = [];
+    Object.keys(IMPORT_COLS).forEach(function(col){
+      var have = REAL[IMPORT_COLS[col]] || {}, docs = parsed.cols[col];
+      Object.keys(docs).forEach(function(id){ writes.push([col + "/" + id, mergeDoc(col, have[id], docs[id])]); });
+    });
+    if(parsed.config){ writes.push(["settings/config", Object.assign({}, REAL.config || {}, parsed.config)]); }
+    if(parsed.plan && !REAL_PLAN){ writes.push(["settings/plan", parsed.plan]); }
+    if(STORE_MODE === "cowork"){
+      for(var i=0;i<writes.length;i++){ await dbRef.doc(writes[i][0]).set(writes[i][1]); }
+    } else {
+      await Promise.all(writes.map(function(w){ return dbRef.doc(w[0]).set(w[1]); }));
+    }
+    return writes.length;
+  }
+  var PARSED = null;
+  function showImport(msg, bad){ var r = $("impResult"); r.hidden = false; r.textContent = msg; r.classList.toggle("bad", !!bad); }
+  function readImportSource(){
+    var f = $("impFile").files && $("impFile").files[0];
+    if(f){
+      if(f.size > MAX_IMPORT_CHARS) return Promise.reject(new Error("The file is larger than 15 MB. Ask Claude to leave out the receipt pictures."));
+      return f.text();
+    }
+    return Promise.resolve($("impText").value);
+  }
+  $("impCheck").addEventListener("click", function(){
+    PARSED = null; $("impConfirmRow").hidden = true;
+    if(DEMO){ showImport("Leave the example first. Imports only go into your own data.", true); return; }
+    readImportSource().then(function(text){
+      var parsed = parseImport(text), c = parsed.counts, plan = importPlan(parsed);
+      var total = c.receipts + c.subscriptions + c.receivables + c.questions;
+      if(!total && !parsed.config && !parsed.plan){ showImport("The file is valid but has nothing in it.", true); return; }
+      PARSED = parsed;
+      var pl = function(n, one, many){ return n + " " + (n === 1 ? one : many); };
+      showImport("Found " + pl(c.receipts, "receipt", "receipts") + ", " + pl(c.subscriptions, "recurring cost", "recurring costs") + ", " + pl(c.receivables, "unpaid invoice", "unpaid invoices") + " and " + pl(c.questions, "question", "questions") + (parsed.config ? ", plus settings" : "") + ". " +
+        "New: " + plan.fresh + ". Updated from Claude: " + plan.updated + ". Keeping the choices you already made: " + plan.kept + "." +
+        (parsed.skipped ? " Skipped because of a broken id: " + parsed.skipped + "." : "") + (parsed.plan && REAL_PLAN ? " The plan in the file is ignored, because you already have one." : ""));
+      $("impConfirmRow").hidden = false;
+    }).catch(function(e){ showImport(String((e && e.message) || e), true); });
+  });
+  $("impCancel").addEventListener("click", function(){ PARSED = null; $("impConfirmRow").hidden = true; $("impResult").hidden = true; });
+  $("impGo").addEventListener("click", function(){
+    if(!PARSED) return;
+    var b = $("impGo"); b.disabled = true;
+    runImport(PARSED).then(function(n){
+      showImport("Imported. " + n + " items saved. The numbers above are updated.", false);
+      PARSED = null; $("impConfirmRow").hidden = true; $("impFile").value = ""; $("impText").value = "";
+    }).catch(function(e){ showImport("Import stopped: " + String((e && e.message) || e).slice(0,160) + ". Nothing after that point was saved.", true); })
+      .then(function(){ b.disabled = false; });
+  });
+
+  function buildExport(short){
+    var out = {format:"business-runway", version:1, exportedAt:new Date().toISOString(), kind: short ? "short" : "backup"};
+    out.config = REAL.config || null;
+    out.plan = REAL_PLAN || null;
+    Object.keys(IMPORT_COLS).forEach(function(col){
+      var src = REAL[IMPORT_COLS[col]] || {}, dst = {};
+      Object.keys(src).forEach(function(id){
+        var d = Object.assign({}, src[id]);
+        if(short){ delete d.thumb; delete d.hint; delete d.description; }
+        dst[id] = d;
+      });
+      out[col] = dst;
+    });
+    return JSON.stringify(out, null, short ? 0 : 1);
+  }
+  function exportNote(t){ $("expNote").textContent = t; }
+  $("expFull").addEventListener("click", function(){
+    if(DEMO){ exportNote("Leave the example first. There is nothing of yours to back up."); return; }
+    var text = buildExport(false), name = "business-runway-backup-" + localISO() + ".json";
+    if(dl){ dl.save({filename:name, data:new Blob([text], {type:"application/json"})}).then(function(){ exportNote("Backup saved as " + name + "."); }).catch(function(){ exportNote("The download was blocked. Copy the text below and save it as " + name + "."); showExportBox(text); }); return; }
+    try {
+      var url = URL.createObjectURL(new Blob([text], {type:"application/json"})), a = document.createElement("a");
+      a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+      exportNote("Backup saved as " + name + ". Did no file appear? Copy the text below and save it yourself.");
+    } catch(e){ exportNote("This view blocks downloads. Copy the text below and save it as " + name + "."); }
+    showExportBox(text);
+  });
+  function showExportBox(text){ var box = $("expBox"); box.hidden = false; box.value = text; }
+  $("expShort").addEventListener("click", function(){
+    if(DEMO){ exportNote("Leave the example first."); return; }
+    var text = buildExport(true);
+    showExportBox(text);
+    var done = function(){ exportNote("Copied. Paste it into your chat with Claude and say \"update my runway\"."); };
+    var fail = function(){ $("expBox").select(); exportNote("Select the text in the box, copy it and paste it into your chat with Claude."); };
+    try { navigator.clipboard.writeText(text).then(done, fail); } catch(e){ fail(); }
+  });
+
   /* ================= boot ================= */
   fillMonthSelects(); planToInputs(); refreshAll();
   var bootTimer = setTimeout(function(){
     if(!REAL.loaded){ REAL.loaded = true; LOAD_NOTE = "Your data is taking longer than usual to load. Reload the page if it stays empty."; refreshAll(); }
   }, 12000);
-  if(!window.claude || !window.claude.use){
-    REAL.loaded = true; clearTimeout(bootTimer);
-    LOAD_NOTE = "Open this page on claude.ai to keep your data. The example still works here.";
-    refreshAll();
-    return;
+  var STORE_MODE = "";
+  function setMode(mode, note){
+    STORE_MODE = mode;
+    var txt = {
+      cowork: "Saved in this artifact's own store in your Claude account. If Claude cannot write here directly, it gives you a file to import below.",
+      chat: "Saved in your Claude account. Only you can see your numbers, even if someone else opens the same link.",
+      browser: "Saved in this browser only. Nothing leaves your computer. Clear your browser data and it is gone, so download a backup now and then.",
+      memory: "This view cannot save. Numbers you type disappear when you close the page. Download a backup before you leave."
+    }[mode] || "";
+    $("storeNote").textContent = txt + (note ? " " + note : "");
+    var ob = {
+      cowork: 'Go back to the Claude chat where you set up this page and say "update my runway". Claude writes it here, or gives you a file to import under Your data below.',
+      chat: 'Ask Claude to set up your business runway with the Business Runway skill. It gives you a file. Import it under Your data below.',
+      browser: 'Ask Claude to set up your business runway with the Business Runway skill. It gives you a file. Import it under Your data below.',
+      memory: 'Ask Claude for an import file, then import it under Your data below. It stays until you close the page.'
+    }[mode];
+    if(ob) $("obClaude").textContent = ob;
+    $("footStore").textContent = mode === "browser" ? "Your data stays in this browser and is never sent to Brinvik." : mode === "memory" ? "Nothing is saved in this view and nothing is sent to Brinvik." : "Your data stays in your Claude account and is never sent to Brinvik.";
   }
-  window.claude.use("downloads").then(function(x){ dl = x; syncDlButtons(); }).catch(function(){});
-  window.claude.use("db").then(function(db){
-    if(!db){ REAL.loaded = true; LOAD_NOTE = "Saving is not available in this view."; refreshAll(); return; }
+
+  /* ---------- a small document store on top of any key-value storage ---------- */
+  function makeKvDb(kv){
+    var PFX = "business-runway:v1:", COLS = ["receipts","subscriptions","questions","receivables","settings"], CHUNK = 1500000;
+    var MEM = {}, colSubs = {}, docSubs = [], timers = {}, chunkCount = {}, failed = false;
+    COLS.forEach(function(c){ MEM[c] = {}; colSubs[c] = []; chunkCount[c] = 0; });
+    function loadCol(c){
+      return kv.get(PFX + c).then(function(head){
+        if(!head) return;
+        var h = JSON.parse(head); if(!h || typeof h !== "object") return;
+        var n = Math.max(0, Math.min(200, Math.floor(num(h.chunks)))); chunkCount[c] = n;
+        var parts = []; for(var i=0;i<n;i++) parts.push(kv.get(PFX + c + ":" + i));
+        return Promise.all(parts).then(function(arr){
+          if(arr.some(function(x){ return typeof x !== "string"; })) throw new Error("A saved part of " + c + " is missing.");
+          var docs = JSON.parse(arr.join(""));
+          if(docs && typeof docs === "object" && !Array.isArray(docs)) MEM[c] = docs;
+        });
+      });
+    }
+    var ready = Promise.all(COLS.map(function(c){ return loadCol(c).catch(function(e){ failed = true; throw e; }); }));
+    function snapCol(c){ return {docs: Object.keys(MEM[c]).map(function(id){ return {id:id, exists:true, data:function(){ return MEM[c][id]; }}; })}; }
+    function docSnap(c, id){ var v = MEM[c] && MEM[c][id]; return {exists: !!v, data: function(){ return v; }}; }
+    function fire(c, id){
+      colSubs[c].forEach(function(fn){ try{ fn(snapCol(c)); }catch(e){} });
+      docSubs.forEach(function(s){ if(s[0] === c && s[1] === id){ try{ s[2](docSnap(c, id)); }catch(e){} } });
+    }
+    function persist(c){
+      var str = JSON.stringify(MEM[c]), n = Math.max(1, Math.ceil(str.length / CHUNK)), jobs = [];
+      for(var i=0;i<n;i++) jobs.push(kv.set(PFX + c + ":" + i, str.slice(i*CHUNK, (i+1)*CHUNK)));
+      return Promise.all(jobs).then(function(){
+        return kv.set(PFX + c, JSON.stringify({v:1, chunks:n, savedAt:new Date().toISOString()}));
+      }).then(function(){
+        var old = chunkCount[c]; chunkCount[c] = n;
+        for(var j=n;j<old;j++){ if(kv.del) kv.del(PFX + c + ":" + j).catch(function(){}); }
+      });
+    }
+    var pendingSave = [];
+    function schedule(c){
+      return new Promise(function(resolve, reject){
+        pendingSave.push([c, resolve, reject]);
+        clearTimeout(timers[c]);
+        timers[c] = setTimeout(function(){
+          var mine = pendingSave.filter(function(p){ return p[0] === c; });
+          pendingSave = pendingSave.filter(function(p){ return p[0] !== c; });
+          persist(c).then(function(){ mine.forEach(function(p){ p[1](); }); }, function(err){
+            mine.forEach(function(p){ p[2](err); });
+            $("storeNote").textContent = "Your last change could not be saved (" + String((err && err.message) || err).slice(0,120) + "). Download a backup so nothing is lost.";
+          });
+        }, 900);
+      });
+    }
+    function checkCol(c){ if(COLS.indexOf(c) < 0) throw new Error("Unknown collection"); }
+    return {
+      ready: ready,
+      collection: function(c){
+        return {onSnapshot: function(fn, onErr){
+          if(COLS.indexOf(c) < 0){ return function(){}; }
+          colSubs[c].push(fn);
+          ready.then(function(){ fn(snapCol(c)); }, function(e){ if(onErr) onErr({code: e && e.message ? e.message : "load failed"}); });
+          return function(){ colSubs[c] = colSubs[c].filter(function(f){ return f !== fn; }); };
+        }};
+      },
+      doc: function(path){
+        var parts = String(path).split("/"), c = parts[0], id = parts[1];
+        return {
+          get: function(){ return ready.then(function(){ return COLS.indexOf(c) < 0 ? {exists:false, data:function(){ return null; }} : docSnap(c, id); }); },
+          set: function(o){ checkCol(c); return ready.then(function(){ MEM[c][id] = JSON.parse(JSON.stringify(o)); fire(c, id); return schedule(c); }); },
+          update: function(o){ checkCol(c); return ready.then(function(){ MEM[c][id] = Object.assign({}, MEM[c][id] || {}, JSON.parse(JSON.stringify(o))); fire(c, id); return schedule(c); }); },
+          onSnapshot: function(fn, onErr){
+            if(COLS.indexOf(c) < 0) return function(){};
+            var s = [c, id, fn]; docSubs.push(s);
+            ready.then(function(){ fn(docSnap(c, id)); }, function(e){ if(onErr) onErr(e); });
+            return function(){ docSubs = docSubs.filter(function(x){ return x !== s; }); };
+          }
+        };
+      }
+    };
+  }
+  function chatKv(){
+    var st = window.storage, keysP = null;
+    /* ask once which keys exist, so a missing key is never confused with a failed read */
+    function keys(){
+      if(!keysP){
+        keysP = typeof st.list === "function"
+          ? Promise.resolve().then(function(){ return st.list("business-runway:", false); }).then(function(r){ var k = (r && r.keys) || []; return k.map(function(x){ return typeof x === "string" ? x : (x && x.key); }); })
+          : Promise.resolve(null);
+      }
+      return keysP;
+    }
+    return {
+      get: function(k){
+        return keys().then(function(list){
+          if(list && list.indexOf(k) < 0) return null;
+          return Promise.resolve().then(function(){ return st.get(k, false); }).then(function(r){ return r && typeof r.value === "string" ? r.value : null; }, function(e){
+            if(!list && /not.?found|no such|does not exist|missing/i.test(String((e && e.message) || e || ""))) return null;
+            throw e;
+          });
+        });
+      },
+      set: function(k, v){ return Promise.resolve().then(function(){ return st.set(k, v, false); }).then(function(r){ if(r === null || r === false) throw new Error("storage refused the save"); }); },
+      del: function(k){ return Promise.resolve().then(function(){ return st.delete ? st.delete(k, false) : null; }); }
+    };
+  }
+  function browserKv(){
+    return new Promise(function(resolve){
+      var idb = null;
+      try { idb = window.indexedDB; } catch(e){ idb = null; }
+      function lsKv(){
+        try { var t = "__br_test"; localStorage.setItem(t, "1"); localStorage.removeItem(t); } catch(e){ return null; }
+        return {
+          get: function(k){ return Promise.resolve().then(function(){ return localStorage.getItem(k); }); },
+          set: function(k, v){ return Promise.resolve().then(function(){ localStorage.setItem(k, v); }); },
+          del: function(k){ return Promise.resolve().then(function(){ localStorage.removeItem(k); }); }
+        };
+      }
+      if(!idb){ resolve(lsKv()); return; }
+      var req;
+      try { req = idb.open("business-runway", 1); } catch(e){ resolve(lsKv()); return; }
+      req.onupgradeneeded = function(){ req.result.createObjectStore("kv"); };
+      req.onerror = function(){ resolve(lsKv()); };
+      req.onblocked = function(){ resolve(lsKv()); };
+      req.onsuccess = function(){
+        var dbh = req.result;
+        function tx(mode, fn){
+          return new Promise(function(res, rej){
+            var t = dbh.transaction("kv", mode), store = t.objectStore("kv"), out = fn(store);
+            t.oncomplete = function(){ res(out && out.result !== undefined ? out.result : undefined); };
+            t.onerror = function(){ rej(t.error || new Error("IndexedDB error")); };
+            t.onabort = function(){ rej(t.error || new Error("IndexedDB aborted")); };
+          });
+        }
+        resolve({
+          get: function(k){ return tx("readonly", function(s){ return s.get(k); }).then(function(v){ return typeof v === "string" ? v : null; }); },
+          set: function(k, v){ return tx("readwrite", function(s){ s.put(v, k); }); },
+          del: function(k){ return tx("readwrite", function(s){ s.delete(k); }); }
+        });
+      };
+    });
+  }
+  function memoryKv(){
+    var m = {};
+    return {get:function(k){ return Promise.resolve(Object.prototype.hasOwnProperty.call(m,k) ? m[k] : null); }, set:function(k,v){ m[k] = v; return Promise.resolve(); }, del:function(k){ delete m[k]; return Promise.resolve(); }};
+  }
+
+  function attach(db){
     dbRef = db;
     lockPlan(true);
     setTimeout(function(){ if(!PLAN_READY){ PLAN_READY = true; lockPlan(false); } }, 8000);
@@ -2119,6 +2465,33 @@ input[type=text],input[type=month]{font-family:"IBM Plex Mono",monospace;font-si
     db.doc("settings/plan").onSnapshot(function(doc){
       applyPlan((doc && doc.exists && doc.data()) || null);
     }, function(){ PLAN_READY = true; lockPlan(false); });
-  }).catch(function(){ REAL.loaded = true; LOAD_NOTE = "Could not reach the data store."; refreshAll(); });
+  }
+  function useKv(kvPromise, mode){
+    return Promise.resolve(kvPromise).then(function(kv){
+      if(!kv){ setMode("memory"); kv = memoryKv(); } else setMode(mode);
+      var db = makeKvDb(kv);
+      db.ready.catch(function(e){
+        LOAD_NOTE = "Saved data could not be read (" + String((e && e.message) || e).slice(0,120) + "). Nothing was changed.";
+        $("storeNote").textContent += " " + LOAD_NOTE;
+      });
+      attach(db);
+    });
+  }
+  function startLocal(){
+    var hasChatStore = false;
+    try { hasChatStore = !!(window.storage && typeof window.storage.get === "function" && typeof window.storage.set === "function"); } catch(e){ hasChatStore = false; }
+    if(hasChatStore) return useKv(chatKv(), "chat");
+    return useKv(browserKv(), "browser");
+  }
+  if(window.claude && typeof window.claude.use === "function"){
+    window.claude.use("downloads").then(function(x){ dl = x; syncDlButtons(); }).catch(function(){});
+    window.claude.use("db").then(function(db){
+      if(!db){ startLocal(); return; }
+      setMode("cowork");
+      attach(db);
+    }).catch(function(){ startLocal(); });
+  } else {
+    startLocal();
+  }
 })();
 </script>

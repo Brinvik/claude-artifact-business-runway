@@ -9,6 +9,8 @@ function report(ok, name, why) {
   await require('./drive-script.test.js')(report);
   console.log('\nbusiness-runway.html');
   await require('./page.test.js')(report);
+  console.log('\nsaving outside Cowork');
+  await require('./storage.test.js')(report);
   console.log('\n' + passed + ' passed, ' + failed + ' failed\n');
   process.exit(failed ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });

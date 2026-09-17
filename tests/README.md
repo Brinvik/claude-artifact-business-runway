@@ -25,6 +25,7 @@ Every line says PASS or FAIL. The last line counts them.
 - the plan is saved by month, and a pay of 0 stays 0
 - new categories appear in the filters, and broken settings do not break the page
 - the receipt picture works with the keyboard, and the page fits a phone
+- outside Cowork it saves in claude.ai storage or the browser, imports are checked and cannot run code, user choices survive a new import, and the skill zip matches the repo
 
 **receipts-to-drive.gs**, in Node with fake Gmail and Drive:
 

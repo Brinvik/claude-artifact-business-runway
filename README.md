@@ -27,23 +27,39 @@ It works in any currency.
 
 Solo founders, consultants and small teams who want a clear picture of their cash without learning accounting software.
 
-## Setup in three steps
+## Two ways to set it up
 
-You need a Claude account where artifacts can save data. Around 15 minutes.
+Both take about 15 minutes. Claude asks the questions and fills in the numbers.
 
-1. **Download** `business-runway.html` and `SETUP-PROMPT.md`. On Gmail and Google Drive? Take `receipts-to-drive.gs` too.
-2. **Open a new chat in Claude.** Attach the files. Paste the text from `SETUP-PROMPT.md`.
-3. **Answer Claude's questions.** About 15 of them: founders, hires, rent, your own pay, ads, unpaid invoices, where your receipts are.
+### Pro, Max, Team or Enterprise: Claude builds it for you
 
-Claude publishes your own private copy and fills it in. Later, say "update my runway" in the same chat.
+Works in Claude Cowork and Claude Code. Your data is saved in your Claude account, and Claude updates the page directly.
+
+1. **Download** `business-runway-skill.zip`.
+2. **Add the skill.** In Claude go to Customize, then Skills. Press +, then Upload a skill, and pick the zip. Code execution must be on.
+3. **Say** "set up my business runway". Claude loads /dataviz, asks its questions and publishes your private page.
+
+Using Claude Code? Unzip the file into your skills folder instead, `%USERPROFILE%\.claude\skills` on Windows.
+
+### Free plan
+
+1. **Download** `business-runway-skill.zip` and `business-runway.html`.
+2. **Add the skill** the same way as above. Can't add skills? Paste the text from `SETUP-PROMPT.md` into a new chat and attach the HTML file instead.
+3. **Say** "set up my business runway". Claude asks its questions, then either publishes your page or tells you to open the HTML file in Chrome or Edge.
+4. **Import.** Claude gives you a file. On the page, go to Your data, pick the file and press Import now.
+
+Opened the HTML file yourself? Then your numbers are saved in that browser only. Download a backup now and then.
+
+Later, say "update my runway" in Claude. On the Free route, press Copy the short version for Claude first and paste it into the chat.
 
 Want to look before you set anything up? Open the page and press **Show it with example numbers**.
 
 ## Your data
 
 - Your copy is private. Only you can open it unless you share it.
-- Receipts are stored in your artifact's own database inside your Claude account. Nothing goes to Brinvik or to this repo.
+- On Pro and up, receipts are stored in your artifact's own database inside your Claude account. On the Free route, they stay in your own browser. Nothing goes to Brinvik or to this repo.
 - Claude reads your email only when you ask it to and only for invoices.
+- On the Free route, anyone who uses your computer account and browser can open the page and see the numbers. Use your own browser profile, and do not open HTML files from people you do not trust in the same browser.
 - **Do not share the link to your own copy.** Anyone you share it with can see and change your receipts.
 - The setup prompt tells Claude to leave out card numbers, bank account numbers and ID numbers. Check the first import yourself.
 - The page uses Google Fonts, so Google sees your IP address when the page opens. Prefer not? Tell Claude "use system fonts for my runway page" and it removes them.
@@ -60,8 +76,9 @@ Want to look before you set anything up? Open the page and press **Show it with 
 
 | File | What it is |
 |---|---|
-| `business-runway.html` | The page. Claude publishes your own private copy of it. |
-| `SETUP-PROMPT.md` | Paste into Claude to set everything up. |
+| `business-runway-skill.zip` | The skill. Upload it to Claude and say "set up my business runway". Unzip it first if you want to read it. |
+| `business-runway.html` | The page. Claude publishes your private copy, or you open it in your browser. |
+| `SETUP-PROMPT.md` | The same setup as a prompt, for when you cannot add skills. |
 | `receipts-to-drive.gs` | Optional Google Apps Script that saves receipts from Gmail into Google Drive. |
 | `tests/` | Automated checks for the page and the script. Only needed if you change the code. |
 | `screenshot.png`, `screenshot-mobile.png` | The page in example mode. |

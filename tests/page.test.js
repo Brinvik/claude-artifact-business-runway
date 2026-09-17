@@ -187,9 +187,24 @@ module.exports = async function run(report) {
     await page.close();
   });
 
-  await test('works without claude.ai, with a clear message', async () => {
+  await test('a published page with a database can import a file from Claude', async () => {
+    const page = await open();
+    await page.fill('#impText', JSON.stringify({ format: 'business-runway', version: 1, config: { name: 'Chat Co', currency: 'DKK', locale: 'da-DK' },
+      subscriptions: { rent: { name: 'Rent', amount: 2000, currency: 'DKK', cadence: 'month', vat: true, active: true, kind: 'rent' } } }));
+    await page.click('#impCheck'); await page.waitForTimeout(150);
+    await page.click('#impGo'); await page.waitForTimeout(500);
+    assert.match(await text(page, '#impResult'), /Imported/);
+    const store = await page.evaluate(() => window.__store);
+    assert.strictEqual(store.settings.config.name, 'Chat Co');
+    assert.strictEqual(store.subscriptions.rent.amount, 2000);
+    assert.match(await text(page, '#storeNote'), /import below/);
+    await page.close();
+  });
+
+  await test('without claude.ai the page saves in the browser and says so', async () => {
     const page = await open({ mock: false });
-    assert.match(await text(page, '#triageState'), /claude\.ai/);
+    await page.waitForTimeout(300);
+    assert.match(await text(page, '#storeNote'), /this browser only/);
     assert.deepStrictEqual(page.errors, []);
     await page.close();
   });
