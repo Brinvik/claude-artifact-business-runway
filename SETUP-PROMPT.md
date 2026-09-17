@@ -8,7 +8,7 @@ You are setting up my Business Runway page. It is the HTML file attached to this
 
 ## 1. Before you touch the page
 
-Load the dataviz skill first. In Claude you can type `/dataviz`, or use the skill if it is listed. Follow it for any chart, colour or number tile you add or change later. If the skill is not available in my Claude, tell me in one line and continue. The page already follows its rules.
+If you have a chart design skill (it is called `dataviz` in some Claude plans), load it first and follow it for any chart, colour or number tile you add or change later. Do not use a dashboard builder skill such as `/build-dashboard`. The page is already built, and those skills make a new page. No chart skill in my Claude? Skip this step without asking. The page already follows the rules.
 
 Do not rewrite the page unless one of my answers needs a change. If it does, say what you will change and why before you do it.
 
