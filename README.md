@@ -1,6 +1,6 @@
 # Business Runway, a Claude artifact
 
-A free Claude artifact that tells you how many months your business can run on the money in the bank. Cash flow forecast, burn rate, break even and receipt tracking in one page, set up by Claude in about 15 minutes.
+A free Claude artifact that tells you how many months your business can run on the money in the bank. Cash flow forecast, burn rate, break even and receipt tracking in one page, set up by Claude in about 10 minutes.
 
 Made by [Brinvik](https://www.brinvik.com).
 
@@ -29,7 +29,7 @@ Solo founders, consultants and small teams who want a clear picture of their cas
 
 ## Two ways to set it up
 
-Both take about 15 minutes. Claude asks the questions and fills in the numbers.
+Both take about 10 minutes. You click through a few rounds of questions, type your numbers once, and Claude fills in the page.
 
 ### Pro, Max, Team or Enterprise: Claude builds it for you
 
@@ -86,7 +86,7 @@ Want to look before you set anything up? Open the page and press **Show it with 
 ## Videos
 
 - What it is and what you get (coming soon)
-- Setting it up in 15 minutes (coming soon)
+- Setting it up in 10 minutes (coming soon)
 
 ## Made by
 

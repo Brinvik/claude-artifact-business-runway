@@ -32,35 +32,56 @@ Never use a dashboard builder such as `/build-dashboard` or `/create-viz`. They 
 
 ## 3. Interview
 
-Ask these one at a time. After each answer, say in one short line what you will do with it. If the user gives several answers at once, take them and skip ahead. Keep it under 10 minutes.
+Make it fast. The user should mostly click.
 
-**About the business**
+**Use clickable questions when you have them.** If you have a tool that shows multiple-choice questions (such as AskUserQuestion), use it for every round below. Max 4 questions per round, 2 to 4 short options each. The user can always type their own answer instead. No such tool? Ask each round as a short numbered list the user can answer in one message, like "1b, 2a, 3c".
 
-1. What is the business called, and what currency is your bank account in?
-2. Solo founder, or more founders? If more: how many take pay out of the business?
-3. Anyone hired? For each: full time, part time or freelance, and the total monthly cost. One total for everyone is fine.
-4. Rent for an office or desk? Monthly amount, and is VAT added?
-5. Taking out pay yourself yet? If yes: monthly, net in hand. If no: when do you expect to start?
-6. Ads or marketing budget? Roughly per month.
-7. Which Claude plan, monthly or yearly? First look for invoices from Anthropic in the user's email or files and say what you found. Only ask if you find none. Take the price from the invoice or the user, never from memory.
-8. Other tools or subscriptions? A rough list is enough.
+**Skip what you already know.** Look for Anthropic invoices, the business name and the currency in the user's email or files first, if you can reach them. Only ask what is still missing. Say in one line what you found.
 
-**Money in**
+**Round 1. The business**
 
-9. Invoices sent but not paid yet? Who, how much, when do you expect the money?
-10. Expected new sales in the next months? A rough monthly number and a start month. "I don't know" is fine.
+1. Bank account currency? DKK, EUR, USD, GBP (or type another)
+2. Founders? Solo / 2 founders / 3 or more
+3. People you pay? Nobody / Freelancers only / Employees / Both
+4. Paying yourself? Not yet / Yes / Starting within 3 months
 
-**Receipts and tools**
+**Round 2. Costs**
 
-11. Where do invoices arrive? Gmail, Outlook or something else, and is there one inbox, label or folder?
-12. A private cloud folder for photos of paper receipts? Google Drive, OneDrive, Dropbox or something else.
-13. An automation tool like Make, n8n or Zapier?
+1. Office or desk rent? No rent / Yes, VAT added / Yes, no VAT
+2. Ads or marketing budget? None / Yes, I will type the amount
+3. Claude plan? Free / Pro / Max / Team or paid by work. Ask only if no Anthropic invoice was found. Never take a price from memory.
+4. Paid monthly or yearly? Monthly / Yearly. Skip for Free.
 
-**Tax and VAT**
+**Round 3. Money and tax**
 
-14. VAT rate, and do you reclaim VAT on costs? Not registered means 0 and no.
-15. Percent set aside for tax on your own pay? If unknown, suggest asking their accountant and use 30 for now.
-16. Average deal or project size? Skip if it does not fit.
+1. Invoices sent but not paid yet? None / Yes
+2. Expected new sales in the next months? I don't know yet / Yes, I have a number
+3. VAT? Registered and I reclaim VAT / Registered, no reclaim / Not VAT registered
+4. Tax to set aside on your own pay? 30 percent (common starting point) / 25 percent / 40 percent / I don't know, use 30
+
+**Round 4. Receipts**
+
+1. Where do invoices arrive? Gmail / Outlook / Other email
+2. Where can you keep photos of paper receipts? Google Drive / OneDrive / Dropbox / Nowhere yet
+3. Automation tool? None / Make / n8n / Zapier
+
+**Round 5. The numbers, typed once**
+
+Ask for everything that needs typing in one message, and only the lines that apply:
+
+- business name
+- monthly rent, if any
+- monthly cost of the people you pay, one total is fine
+- your own pay per month, net, and the start month
+- ads per month
+- the Claude plan price, if no invoice was found
+- other tools you pay for, a rough list with prices
+- unpaid invoices: who, how much, when you expect the money
+- expected sales per month and the first month
+- VAT rate, if not 0
+- average deal size, optional
+
+Show one example line so they know the format, like "Rent 2000, Team 15000, Pay 20000 from January". Take whatever they give. Ask a short follow-up only for something you cannot work without. The whole interview should take under 5 minutes.
 
 ## 4. Build it
 
@@ -90,7 +111,7 @@ Never ask the user to type everything in by hand when an import file can do it.
 
 ## 5. Receipts
 
-Follow Receipts below for the user's answers to questions 11 to 13. Receipts only go in after the receipt route is in place. Ask how far back to look. Suggest the start date.
+Follow Receipts below for the answers in Round 4. Receipts only go in after the receipt route is in place. Ask how far back to look. Suggest the start date.
 
 ## 6. Updating later
 
@@ -221,4 +242,4 @@ There is no ready-made script in the kit. Offer two routes:
 
 ### Paper receipts
 
-Photograph each receipt and put the photo in the folder from question 12. File name `YYYY-MM-DD shop amount.jpg`, so the date is right even if they upload it later.
+Photograph each receipt and put the photo in the folder they picked in Round 4. File name `YYYY-MM-DD shop amount.jpg`, so the date is right even if they upload it later.
