@@ -1,0 +1,2124 @@
+<title>Business Runway artifact from Brinvik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --paper:#EFF2F3;
+  --surface:#FFFFFF;
+  --surface-2:#F7F9F9;
+  --ink:#12181B;
+  --ink-2:#41525A;
+  --ink-3:#728891;
+  --line:#D6DEE1;
+  --line-soft:#E6ECEE;
+  --teal:#0E5C63;
+  --teal-2:#1B8A8F;
+  --slate:#42638F;
+  --ochre:#A4761F;
+  --plum:#6B4570;
+  --moss:#4B7444;
+  --alarm:#B23A10;
+  --alarm-soft:#F6E3DA;
+  --ok:#2E6B4C;
+  --shadow:0 1px 2px rgba(18,24,27,.06), 0 8px 24px -16px rgba(18,24,27,.28);
+
+  /* ---- data-viz roles. Validated with the dataviz validator against this
+     surface (#FFFFFF): lightness band PASS, chroma floor PASS, adjacent CVD
+     worst dE 13.8, normal-vision worst dE 19.6, contrast WARN on s4/s5 which
+     is why every chart that uses them also prints its values in full. ---- */
+  --s1:#00919C;  /* teal   - the single hue for magnitude */
+  --s2:#EB6834;  /* orange */
+  --s3:#4A3AA7;  /* violet */
+  --s4:#EDA100;  /* yellow */
+  --s5:#E87BA4;  /* magenta */
+  --s6:#728891;  /* the tail, deliberately neutral */
+  --s1-track:#D6EDEF;
+  --pos:#00919C;
+  --neg:#D03B3B;
+  --grid:#E6ECEE;
+  --axis:#C3CDD1;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0D1215;
+    --surface:#151D21;
+    --surface-2:#1B2429;
+    --ink:#E9EFF1;
+    --ink-2:#A9BAC1;
+    --ink-3:#7B8E96;
+    --line:#2A363C;
+    --line-soft:#212B30;
+    --teal:#3FB3B8;
+    --teal-2:#2A8E93;
+    --slate:#7E9DD0;
+    --ochre:#D7A249;
+    --plum:#B08BB4;
+    --moss:#7FAE74;
+    --alarm:#EE7248;
+    --alarm-soft:#3A211A;
+    --ok:#6FBF95;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -18px rgba(0,0,0,.9);
+    --s1:#1FA3AF; --s2:#D95926; --s3:#9085E9; --s4:#C98500; --s5:#D55181; --s6:#7B8E96;
+    --s1-track:#123C42; --pos:#1FA3AF; --neg:#D03B3B; --grid:#212B30; --axis:#3A484F;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0D1215;
+  --surface:#151D21;
+  --surface-2:#1B2429;
+  --ink:#E9EFF1;
+  --ink-2:#A9BAC1;
+  --ink-3:#7B8E96;
+  --line:#2A363C;
+  --line-soft:#212B30;
+  --teal:#3FB3B8;
+  --teal-2:#2A8E93;
+  --slate:#7E9DD0;
+  --ochre:#D7A249;
+  --plum:#B08BB4;
+  --moss:#7FAE74;
+  --alarm:#EE7248;
+  --alarm-soft:#3A211A;
+  --ok:#6FBF95;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -18px rgba(0,0,0,.9);
+  --s1:#1FA3AF; --s2:#D95926; --s3:#9085E9; --s4:#C98500; --s5:#D55181; --s6:#7B8E96;
+  --s1-track:#123C42; --pos:#1FA3AF; --neg:#D03B3B; --grid:#212B30; --axis:#3A484F;
+}
+
+*{box-sizing:border-box}
+[hidden]:not([hidden=until-found]){display:none!important}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Source Sans 3",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:15px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 22px 72px;display:flex;flex-direction:column;gap:26px}
+
+h1,h2,h3{font-family:Archivo,"Source Sans 3",sans-serif;margin:0;text-wrap:balance}
+h1{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.02em}
+h2{font-size:19px;font-weight:600;letter-spacing:-.01em}
+h3{font-size:14px;font-weight:600}
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);
+}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.num{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+
+/* masthead */
+.masthead{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;justify-content:space-between;
+  border-bottom:2px solid var(--ink);padding-bottom:16px}
+.masthead p{margin:6px 0 0;color:var(--ink-2);max-width:56ch}
+.asof{text-align:right}
+
+/* verdict strip */
+.verdict{
+  background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--alarm);
+  border-radius:3px;padding:18px 20px;display:flex;flex-wrap:wrap;gap:22px;align-items:center;
+  box-shadow:var(--shadow);
+}
+.verdict .big{font-family:Archivo,sans-serif;font-size:clamp(48px,6vw,60px);font-weight:700;line-height:.95;
+  color:var(--neg);letter-spacing:-.03em;font-variant-numeric:proportional-nums}
+.verdict .vtext{flex:1 1 340px}
+.verdict .vtext strong{font-weight:600}
+
+/* kpi row */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.kpi{background:var(--surface);padding:16px 18px;display:flex;flex-direction:column;gap:5px}
+.kpi .v{font-family:Archivo,sans-serif;font-size:27px;font-weight:600;line-height:1.05;letter-spacing:-.02em}
+.kpi .sub{font-size:12.5px;color:var(--ink-3);line-height:1.35}
+.kpi.warn .v{color:var(--neg)}
+.kpi.good .v{color:var(--ok)}
+
+/* panels */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:20px 22px;box-shadow:var(--shadow)}
+.panel-head{display:flex;flex-wrap:wrap;gap:12px;align-items:baseline;justify-content:space-between;margin-bottom:4px}
+.panel-note{font-size:12.5px;color:var(--ink-3);margin:2px 0 16px;max-width:70ch}
+.grid-2{display:grid;grid-template-columns:1.45fr 1fr;gap:22px}
+@media(max-width:860px){.grid-2{grid-template-columns:1fr}}
+
+/* controls */
+.controls{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end}
+.ctl{display:flex;flex-direction:column;gap:6px}
+.ctl label{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+input[type=range]{width:210px;accent-color:var(--teal)}
+select,input[type=number]{
+  font-family:"IBM Plex Mono",monospace;font-size:13px;padding:6px 9px;border:1px solid var(--line);
+  border-radius:2px;background:var(--surface-2);color:var(--ink);
+}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.03em;
+  padding:5px 11px;border:1px solid var(--line);border-radius:100px;background:var(--surface-2);
+  color:var(--ink-2);cursor:pointer;transition:background .12s,border-color .12s,color .12s;
+}
+.chip:hover{border-color:var(--ink-3)}
+.chip[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:#fff}
+:root[data-theme="dark"] .chip[aria-pressed="true"],
+:root:not([data-theme="light"]) .chip[aria-pressed="true"]{color:#0D1215}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .chip[aria-pressed="true"]{color:#fff}}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--teal-2);outline-offset:2px}
+
+/* cash chart */
+.cashchart{width:100%;height:auto;display:block;overflow:visible}
+.axis-label{font-family:"IBM Plex Mono",monospace;font-size:9.5px;fill:var(--ink-3)}
+.month-label{font-family:"IBM Plex Mono",monospace;font-size:10px;fill:var(--ink-2)}
+.bar-value{font-family:"IBM Plex Mono",monospace;font-size:9.5px;fill:var(--ink-2);font-weight:500}
+
+/* donut legend */
+.legend{display:flex;flex-direction:column;gap:2px;margin-top:14px}
+.legend-row{display:grid;grid-template-columns:12px 1fr auto auto;gap:10px;align-items:center;
+  padding:5px 0;border-bottom:1px solid var(--line-soft);font-size:13px}
+.legend-row:last-child{border-bottom:0}
+.sw{width:11px;height:11px;border-radius:2px}
+.legend-row .amt{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-size:12.5px}
+.legend-row .pct{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-3);width:44px;text-align:right}
+
+/* supplier bars: one hue, thin, 4px rounded data-end, square at the baseline */
+.vbars{display:flex;flex-direction:column;gap:2px;margin-top:6px}
+.vbar{display:grid;grid-template-columns:150px 1fr 92px;gap:12px;align-items:center;font-size:13px;
+  min-height:26px;padding:2px 0;border-radius:2px}
+.vbar:hover,.vbar:focus-visible{background:var(--surface-2);outline:none}
+.vbar .track{height:14px}
+.vbar .fill{height:100%;border-radius:0 4px 4px 0;background:var(--s1)}
+.vbar .val{font-family:"IBM Plex Mono",monospace;font-size:12.5px;text-align:right;font-variant-numeric:tabular-nums}
+.vbar .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:640px){.vbar{grid-template-columns:110px 1fr 78px}}
+
+/* table */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:3px;margin-top:14px}
+table{border-collapse:collapse;width:100%;min-width:900px;font-size:13.5px}
+th{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);text-align:left;padding:10px 12px;background:var(--surface-2);
+  border-bottom:1px solid var(--line);white-space:nowrap;cursor:pointer;user-select:none;
+}
+th:hover{color:var(--ink)}
+th.right,td.right{text-align:right}
+td{padding:9px 12px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--surface-2)}
+td.num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tag{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;padding:2px 7px;
+  border-radius:100px;border:1px solid var(--line);color:var(--ink-2);white-space:nowrap}
+.tag.flag{background:var(--alarm-soft);border-color:transparent;color:var(--alarm);font-weight:600}
+button.tag{cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:10.5px}
+button.tag.flag:hover{background:var(--alarm);color:#fff}
+.tag.ok{background:var(--ok);border-color:transparent;color:#fff;font-weight:600}
+.tag.no{background:var(--alarm);border-color:transparent;color:#fff;font-weight:600}
+@keyframes flashcard{0%,100%{box-shadow:0 0 0 0 rgba(178,58,16,0)}25%,75%{box-shadow:0 0 0 4px rgba(178,58,16,.45)}}
+.rcard.flash,.qcard.flash{animation:flashcard 1.4s ease-in-out 1}
+tr.exp.flash td{animation:flashrow 1.4s ease-in-out 1}
+@keyframes flashrow{0%,100%{background:transparent}25%,60%{background:rgba(0,0,0,.06)}}
+.qastrip{border:1px solid var(--line);border-radius:4px;padding:14px 16px;margin-bottom:22px}
+.qahead{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:10px}
+.qahead h3{font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-family:"IBM Plex Mono",monospace;
+  color:var(--ink-3);margin:0;font-weight:600}
+.qalist{display:flex;flex-direction:column;gap:1px;background:var(--line)}
+.qarow{background:var(--surface);padding:10px 12px;display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.qarow .qn{flex:1 1 240px}
+.qarow .qs{font-size:12px;color:var(--ink-3);flex:2 1 320px;line-height:1.45}
+.qabadge{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  border-radius:3px;padding:3px 7px;border:1px solid var(--line);white-space:nowrap}
+.qabadge.pass{color:var(--ok);border-color:var(--ok)}
+.qabadge.review{color:var(--alarm);border-color:var(--alarm)}
+.qaconf{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.qaconf .qcf{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-3);margin-right:2px}
+.qaconf .qcw{flex-basis:100%;font-size:11.5px;color:var(--ink-3);line-height:1.4}
+.qapick{font-family:"IBM Plex Mono",monospace;font-size:11px;border:1px solid var(--line);
+  background:transparent;color:var(--ink-2);border-radius:3px;padding:3px 8px;cursor:pointer}
+.qapick:hover{border-color:var(--ink-2);color:var(--ink)}
+.qapick.on{border-color:var(--ok);color:var(--ok);font-weight:600}
+.qaact{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+.qaline{margin-top:10px;border-top:1px solid var(--line-soft);padding-top:10px}
+.qalinewrap{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.qathumb{width:130px;border-radius:3px;border:1px solid var(--line);flex:0 0 auto;cursor:zoom-in}
+.qadl{display:grid;grid-template-columns:auto 1fr;gap:3px 14px;margin:0;flex:1 1 260px;min-width:220px}
+.qadl dt{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--ink-3);align-self:center}
+.qadl dd{margin:0;font-size:12.5px;color:var(--ink-2)}
+.qanote{margin-top:8px;font-size:12px;color:var(--ink-3);line-height:1.45}
+.qabtn{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid var(--line);background:transparent;color:var(--ink-2);border-radius:3px;
+  padding:5px 10px;cursor:pointer}
+.qabtn:hover{border-color:var(--ink-2);color:var(--ink)}
+.qabtn.go{border-color:var(--ok);color:var(--ok)}
+.qnum{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3)}
+.wilist{display:flex;flex-direction:column;gap:1px;background:var(--line)}
+.wilist:empty{display:none}
+.wirow{background:var(--surface);display:flex;align-items:center;gap:14px;padding:11px 14px;flex-wrap:wrap}
+.wirow .wn{flex:1 1 200px;font-weight:600}
+.wirow .wm{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3)}
+.wirow .wv{font-family:"IBM Plex Mono",monospace;font-weight:600;white-space:nowrap}
+.wix{border:1px solid var(--line);background:transparent;color:var(--ink-3);border-radius:3px;
+  width:26px;height:26px;line-height:1;cursor:pointer;font-size:15px}
+.wix:hover{border-color:var(--alarm);color:var(--alarm)}
+.wiverdict{margin-top:16px;border:1px solid var(--line);border-radius:4px;padding:14px 16px;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px}
+.wiverdict .wc{display:flex;flex-direction:column;gap:4px}
+.wiverdict .wcl{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3)}
+.wiverdict .wcv{font-family:Archivo,sans-serif;font-size:20px;font-weight:600;letter-spacing:-.02em}
+.wiverdict .wcv.bad{color:var(--alarm)}
+.wiverdict .wcv.ok{color:var(--ok)}
+.wiverdict .wcs{font-size:12px;color:var(--ink-3)}
+.savetag{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);border:1px solid var(--line-soft);border-radius:3px;padding:4px 8px}
+.savetag.on{color:var(--ok);border-color:var(--ok)}
+.bankrow{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.bankedit{display:flex;align-items:baseline;gap:5px}
+.bankedit input{font-family:Archivo,sans-serif;font-size:26px;font-weight:700;letter-spacing:-.02em;
+  width:130px;background:transparent;border:none;border-bottom:1px dashed var(--line);color:var(--ink);
+  padding:0 0 2px;text-align:right}
+.bankedit input:focus{outline:none;border-bottom-color:var(--teal)}
+.bankedit span{font-family:Archivo,sans-serif;font-size:20px;font-weight:600;color:var(--ink-3)}
+.bankstamp{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-3);margin-top:4px}
+.bankcell{display:flex;flex-direction:column;gap:4px}
+.bankv{font-family:Archivo,sans-serif;font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1;white-space:nowrap}
+.bankv.warnv{color:var(--alarm)}
+.bankop{font-family:Archivo,sans-serif;font-size:20px;font-weight:600;color:var(--ink-3);padding-bottom:3px}
+.banknote{margin-top:8px;font-size:12px;color:var(--ink-3);max-width:460px}
+.ramp{margin-top:16px;border-top:1px solid var(--line-soft);padding-top:14px}
+.ramp-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:10px}
+.ramp-head h3{font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-family:"IBM Plex Mono",monospace;
+  color:var(--ink-3);margin:0;font-weight:600}
+.ramp-head .hint{font-size:12px;color:var(--ink-3)}
+.ramp-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:6px}
+@media(max-width:900px){.ramp-grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+@media(max-width:520px){.ramp-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.rcell{display:flex;flex-direction:column;gap:4px}
+.rcell span{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-3);text-align:center}
+.rcell input{width:100%;box-sizing:border-box;padding:5px 4px;text-align:right;font-family:"IBM Plex Mono",monospace;
+  font-size:12px;border:1px solid var(--line);border-radius:3px;background:var(--paper);color:var(--ink)}
+.rcell.ovr input{border-color:var(--teal);background:rgba(0,0,0,.02);font-weight:600}
+.rcell.off input{color:var(--ink-3)}
+.rampbtn{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  border:1px solid var(--line);background:transparent;color:var(--ink-2);border-radius:3px;padding:5px 10px;cursor:pointer}
+.rampbtn:hover{border-color:var(--ink-2);color:var(--ink)}
+.tfoot{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between;padding:12px 2px 0;
+  font-size:13px;color:var(--ink-2)}
+.tfoot strong{font-family:"IBM Plex Mono",monospace;color:var(--ink)}
+
+/* subs list */
+.subrow{display:grid;grid-template-columns:1fr 76px 92px;gap:14px;align-items:center;
+  padding:9px 0;border-bottom:1px solid var(--line-soft)}
+.subrow:last-of-type{border-bottom:0}
+.subrow .sname{display:flex;flex-direction:column;gap:2px}
+.subrow .sname .s1{font-weight:500}
+.subrow .sname .s2{font-size:12px;color:var(--ink-3)}
+.subrow .strack{height:8px;background:var(--s1-track);border-radius:100px;overflow:hidden}
+.subrow .sfill{height:100%;background:var(--s1);border-radius:100px}
+.subrow .sval{font-family:"IBM Plex Mono",monospace;font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* break-even ladder */
+.ladder{display:flex;flex-direction:column;gap:0;margin-top:6px}
+.rung{display:flex;flex-wrap:wrap;gap:14px;align-items:baseline;justify-content:space-between;
+  padding:14px 0;border-bottom:1px solid var(--line-soft)}
+.rung:last-child{border-bottom:0}
+.rung .rl{flex:1 1 260px}
+.rung .rl .t{font-weight:600}
+.rung .rl .d{font-size:12.5px;color:var(--ink-3)}
+.rung .rv{font-family:Archivo,sans-serif;font-size:24px;font-weight:600;letter-spacing:-.02em}
+.rung.target{background:var(--surface-2);margin:0 -22px;padding-left:22px;padding-right:22px;border-bottom:0}
+.rung.target .rv{color:var(--neg);font-size:30px}
+
+/* receipt triage */
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(330px,100%),1fr));gap:14px;margin-top:6px}
+.rcard{border:1px solid var(--line);border-radius:3px;background:var(--surface-2);overflow:hidden;
+  display:flex;flex-direction:column}
+.rcard.decided{opacity:.62}
+.rshot{width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--line-soft);display:block;cursor:zoom-in}
+.rnoshot{width:100%;aspect-ratio:4/3;background:var(--line-soft);display:grid;place-items:center;
+  font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3);letter-spacing:.08em;text-align:center;padding:12px}
+.rbody{padding:12px 14px;display:flex;flex-direction:column;gap:7px;flex:1}
+.rtop{display:flex;gap:10px;justify-content:space-between;align-items:baseline}
+.rvendor{font-weight:600;font-size:14.5px;line-height:1.25}
+.ramt{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.rmeta{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3);letter-spacing:.02em}
+.rdesc{font-size:13px;color:var(--ink-2);line-height:1.4}
+.rhint{font-size:12.5px;color:var(--ink-3);line-height:1.4;border-left:2px solid var(--ochre);padding-left:9px}
+.rdetail{border-top:1px solid var(--line);padding-top:8px;display:grid;grid-template-columns:auto 1fr;gap:2px 12px;
+  font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1.45}
+.rdetail dt{color:var(--ink-3);white-space:nowrap}
+.rdetail dd{margin:0;color:var(--ink-2);word-break:break-word}
+.rfile{display:inline-flex;align-items:center;gap:7px;font-family:"IBM Plex Mono",monospace;font-size:11.5px;
+  color:var(--teal);text-decoration:none;border:1px solid var(--line);border-radius:2px;padding:6px 10px;align-self:flex-start}
+.rfile:hover{border-color:var(--teal)}
+.rfile::before{content:"PDF";font-weight:600;font-size:9.5px;letter-spacing:.08em;
+  background:var(--teal);color:#fff;padding:2px 5px;border-radius:2px}
+.rnofile{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3)}
+.ract{display:flex;gap:8px;margin-top:auto;padding-top:4px}
+.rbtn{flex:1;font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.04em;padding:9px 8px;
+  border:1px solid var(--line);border-radius:2px;background:var(--surface);color:var(--ink);cursor:pointer;
+  transition:background .12s,border-color .12s,color .12s}
+.rbtn:hover:not(:disabled){border-color:var(--ink-3)}
+.rbtn.yes:hover:not(:disabled){background:var(--ok);border-color:var(--ok);color:#fff}
+.rbtn.no:hover:not(:disabled){background:var(--alarm);border-color:var(--alarm);color:#fff}
+.rbtn:disabled{opacity:.5;cursor:default}
+.rverdict{display:flex;align-items:center;gap:10px;justify-content:space-between;margin-top:auto;padding-top:6px}
+.rverdict .vlabel{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.06em;
+  padding:5px 10px;border-radius:100px}
+.rundo{background:none;border:0;color:var(--ink-3);font-size:12px;cursor:pointer;text-decoration:underline;padding:4px}
+.rundo:hover{color:var(--ink)}
+.rtally{display:flex;flex-wrap:wrap;gap:24px;padding:14px 0 2px;border-top:1px solid var(--line);margin-top:16px}
+.rtally div{display:flex;flex-direction:column;gap:2px}
+.rtally .tl{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3)}
+.rtally .tv{font-family:Archivo,sans-serif;font-size:20px;font-weight:600}
+.lightbox{position:fixed;inset:0;background:rgba(10,14,16,.92);display:none;place-items:center;z-index:60;padding:24px;cursor:zoom-out}
+.lightbox.on{display:grid}
+.lightbox img{max-width:100%;max-height:100%;border-radius:3px}
+.lbclose{position:absolute;top:14px;right:14px;font:600 14px "Source Sans 3",sans-serif;background:#fff;color:#12181B;border:0;border-radius:3px;padding:8px 14px;cursor:pointer}
+.lbclose:focus-visible{outline:3px solid var(--teal-2);outline-offset:2px}
+[data-zoom]:focus-visible{outline:3px solid var(--teal-2);outline-offset:2px}
+.rstate{font-size:13.5px;color:var(--ink-3);padding:14px 0}
+
+.rdl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:auto;padding-top:6px}
+.dlbtn{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.03em;padding:7px 11px;
+  border:1px solid var(--line);border-radius:2px;background:var(--surface);color:var(--ink);cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px}
+.dlbtn:hover:not(:disabled){border-color:var(--teal);color:var(--teal)}
+.dlbtn:disabled{opacity:.5;cursor:default}
+.dlbtn .ext{font-size:9.5px;font-weight:600;letter-spacing:.08em;background:var(--ink-3);color:var(--surface);
+  padding:2px 5px;border-radius:2px}
+.dlall{font-family:"IBM Plex Mono",monospace;font-size:11.5px;padding:8px 13px;border:1px solid var(--line);
+  border-radius:2px;background:var(--surface-2);color:var(--ink);cursor:pointer}
+.dlall:hover{border-color:var(--teal);color:var(--teal)}
+.qcard{border:1px solid var(--line);border-radius:3px;padding:15px 17px;display:flex;flex-direction:column;gap:8px;background:var(--surface-2)}
+.qcard.answered{opacity:.68;background:var(--surface)}
+.qhead{display:flex;gap:12px;align-items:baseline;justify-content:space-between}
+.qtext{font-weight:600;font-size:14.5px;line-height:1.3}
+.qnum{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--ink-3);border:1px solid var(--line);border-radius:2px;padding:2px 6px;white-space:nowrap}
+.qdetail{font-size:13px;color:var(--ink-2);line-height:1.45}
+.qopts{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px;align-items:center}
+.qopt{font-family:"IBM Plex Mono",monospace;font-size:11.5px;padding:8px 13px;border:1px solid var(--line);border-radius:2px;background:var(--surface);color:var(--ink);cursor:pointer}
+.qopt:hover:not(:disabled){border-color:var(--teal);color:var(--teal)}
+.qopt[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:#fff}
+.qeffect{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ok)}
+.qlist2{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+
+tr.exp{cursor:pointer}
+tr.exp:hover{background:var(--surface-2)}
+td.chev{width:26px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace;user-select:none}
+tr.detail>td{background:var(--surface-2);padding:16px 18px}
+.dwrap{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+.dwrap img{max-width:280px;border:1px solid var(--line);border-radius:2px;cursor:zoom-in}
+.dcol{flex:1 1 260px;display:flex;flex-direction:column;gap:9px;min-width:0}
+.paidbtn{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.04em;padding:4px 9px;
+  border-radius:100px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.paidbtn.yes{background:var(--ok);border-color:transparent;color:#fff;font-weight:600}
+.paidbtn.no{background:var(--alarm-soft);border-color:transparent;color:var(--alarm);font-weight:600}
+.paidbtn.due{background:var(--alarm);border-color:transparent;color:#fff;font-weight:600}
+.mvstrip{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--ochre);border-radius:3px;
+  padding:16px 18px;box-shadow:var(--shadow)}
+.mvrow{display:flex;flex-wrap:wrap;gap:12px;align-items:baseline;justify-content:space-between;
+  padding:9px 0;border-bottom:1px solid var(--line-soft);font-size:13.5px}
+.mvrow:last-child{border-bottom:0}
+.age{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.04em;padding:3px 9px;border-radius:100px;
+  background:var(--surface-2);color:var(--ink-3);white-space:nowrap}
+.age.a1{background:var(--alarm-soft);color:var(--alarm)}
+.age.a2{background:var(--ochre);color:#fff;font-weight:600}
+.age.a3{background:var(--alarm);color:#fff;font-weight:600}
+.duestrip{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--alarm);border-radius:3px;
+  padding:16px 18px;box-shadow:var(--shadow)}
+.duerow{display:flex;flex-wrap:wrap;gap:12px;align-items:baseline;justify-content:space-between;
+  padding:9px 0;border-bottom:1px solid var(--line-soft);font-size:13.5px}
+.duerow:last-child{border-bottom:0}
+
+/* questions */
+.qlist{counter-reset:q;list-style:none;padding:0;margin:10px 0 0;display:flex;flex-direction:column;gap:10px}
+.qlist li{counter-increment:q;display:grid;grid-template-columns:26px 1fr;gap:12px;font-size:14px}
+.qlist li::before{content:counter(q);font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3);
+  border:1px solid var(--line);border-radius:2px;width:24px;height:22px;display:grid;place-items:center;margin-top:1px}
+.foot{font-size:12.5px;color:var(--ink-3);border-top:1px solid var(--line);padding-top:14px;line-height:1.6}
+
+/* ---------------- chart layer ---------------- */
+
+/* one tooltip for every chart. It never gates a value: everything it shows is
+   also in the legend or in the table under the chart. */
+.viz-tip{
+  position:fixed;z-index:80;pointer-events:none;max-width:280px;
+  background:var(--surface);border:1px solid var(--line);border-radius:4px;
+  box-shadow:var(--shadow);padding:9px 11px;font-size:12.5px;line-height:1.45;
+}
+.viz-tip .tt{font-weight:600;font-size:12.5px;margin-bottom:5px;color:var(--ink)}
+.viz-tip dl{display:grid;grid-template-columns:auto 1fr auto;gap:3px 9px;margin:0;align-items:center}
+.viz-tip .k{width:14px;height:2px;border-radius:2px}
+.viz-tip .k.sq{height:9px;width:9px;border-radius:2px}
+.viz-tip dt{margin:0;color:var(--ink-3);font-size:12px}
+.viz-tip dd{margin:0;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+  font-weight:600;color:var(--ink);text-align:right;font-size:12.5px}
+.viz-tip .foot{margin-top:6px;padding-top:5px;border-top:1px solid var(--line-soft);
+  color:var(--ink-3);font-size:11.5px}
+
+/* the table twin under a chart */
+.tableview{margin-top:14px;border-top:1px solid var(--line-soft);padding-top:10px}
+.tableview>summary{cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:10.5px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.tableview>summary:hover{color:var(--ink)}
+.tvwrap{overflow-x:auto;margin-top:10px}
+.tableview table{min-width:520px;font-size:12.5px}
+.tableview th{padding:7px 10px}
+.tableview td{padding:6px 10px}
+
+/* cash columns */
+.cashchart{width:100%;height:auto;display:block;overflow:visible;touch-action:none}
+.cbar{transition:opacity .12s}
+.chit{fill:transparent;cursor:pointer}
+.chit:focus-visible{outline:2px solid var(--teal-2);outline-offset:-2px}
+.cashchart.hot .cbar{opacity:.45}
+.cashchart.hot .cbar.on{opacity:1}
+.dry-flag{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.06em;
+  text-transform:uppercase;fill:var(--neg);font-weight:600}
+
+/* composition bar: part-to-whole, top five plus the tail, 2px surface gaps */
+.compwrap{display:flex;gap:2px;height:24px;margin:2px 0 4px;background:transparent}
+.seg{flex:1 1 0;min-width:5px;position:relative;display:grid;place-items:center;overflow:visible;
+  cursor:pointer;border-radius:1px}
+.seg:first-child{border-radius:4px 1px 1px 4px}
+.seg:last-child{border-radius:1px 4px 4px 1px}
+.seg:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.seg .seglab{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;
+  letter-spacing:.02em;white-space:nowrap;pointer-events:none}
+.compwrap.pat .seg::after{content:"";position:absolute;inset:0;border-radius:inherit;
+  background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.55) 0 2px,transparent 2px 6px)}
+.compwrap.pat .seg.alt::after{background-image:repeating-linear-gradient(135deg,rgba(0,0,0,.4) 0 2px,transparent 2px 6px)}
+.compscale{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",monospace;
+  font-size:10px;color:var(--ink-3);letter-spacing:.06em}
+.pattoggle{display:inline-flex;align-items:center;gap:7px;font-family:"IBM Plex Mono",monospace;
+  font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);cursor:pointer}
+.pattoggle input{accent-color:var(--teal)}
+.legend-row:hover,.legend-row:focus-visible{background:var(--surface-2);outline:none}
+.legend-row{cursor:default;border-radius:2px}
+
+/* the filter bar that scopes everything under it */
+.filterbar{background:var(--surface);border:1px solid var(--line);border-radius:3px;
+  padding:14px 18px 16px;box-shadow:var(--shadow)}
+.filterbar .fnote{font-size:12.5px;color:var(--ink-3);margin:0 0 12px}
+
+@media (forced-colors: active){
+  .seg{forced-color-adjust:none}
+  .viz-tip{border:1px solid CanvasText}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+.onboard{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--teal);border-radius:3px;padding:20px 22px;box-shadow:var(--shadow)}
+.onboard ol{margin:10px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:8px;max-width:75ch}
+.onboard code,.prompt{font-family:"IBM Plex Mono",monospace;font-size:12.5px}
+.prompt{display:block;white-space:pre-wrap;background:var(--surface-2);border:1px solid var(--line);border-radius:3px;padding:12px 14px;margin:10px 0;max-width:80ch}
+.demobar{background:var(--ochre);color:#fff;border-radius:3px;padding:9px 14px;font-weight:600;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.demobar button{font:inherit;font-size:13px;background:#fff;color:#12181B;border:0;border-radius:2px;padding:5px 10px;cursor:pointer}
+.setgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px 18px}
+.setgrid input,.setgrid select{width:100%}
+input[type=text],input[type=month]{font-family:"IBM Plex Mono",monospace;font-size:13px;padding:6px 9px;border:1px solid var(--line);border-radius:2px;background:var(--surface-2);color:var(--ink)}
+.subx{border:1px solid var(--line);background:transparent;color:var(--ink-3);border-radius:3px;width:22px;height:22px;line-height:1;cursor:pointer;font-size:13px;margin-left:6px}
+.subx:hover{border-color:var(--alarm);color:var(--alarm)}
+.subrow{grid-template-columns:1fr 76px 110px}
+.vlabel.business{background:var(--ok);color:#fff}
+.vlabel.private{background:var(--alarm);color:#fff}
+@media(max-width:520px){.wrap{padding:20px 16px 56px}.panel{padding:16px}}
+.small{font-size:12.5px;color:var(--ink-3)}
+</style>
+
+<div class="wrap">
+
+  <div class="demobar" id="demoBar" hidden>
+    <span>Example numbers. Nothing here is real and nothing is saved.</span>
+    <button type="button" id="demoOff">Leave the example</button>
+  </div>
+
+  <header class="masthead">
+    <div>
+      <div class="eyebrow" id="mastEyebrow">Business runway &middot; cost base and cash</div>
+      <h1>How long the money lasts</h1>
+      <p id="mastNote">Every cost with a receipt behind it, what it costs per month, and what has to come in before the account is empty.</p>
+    </div>
+    <div class="asof">
+      <div class="bankrow">
+        <div class="bankcell">
+          <label class="eyebrow" for="bankInput">Bank today</label>
+          <div class="bankedit"><input type="number" id="bankInput" step="100" value="0"><span id="curSym"></span></div>
+          <div class="bankstamp" id="bankStamp">type what the account says</div>
+        </div>
+        <div class="bankop">&minus;</div>
+        <div class="bankcell">
+          <div class="eyebrow">Unpaid bills</div>
+          <div class="bankv warnv" id="bankUnpaid">0</div>
+        </div>
+        <div class="bankop">=</div>
+        <div class="bankcell">
+          <div class="eyebrow">Really yours</div>
+          <div class="bankv" id="bankFree">0</div>
+        </div>
+      </div>
+      <div class="banknote" id="bankNote"></div>
+    </div>
+  </header>
+
+  <section class="onboard" id="onboard" hidden>
+    <h2>Nothing in here yet</h2>
+    <p class="small" style="margin:6px 0 0">Three ways to start:</p>
+    <ol>
+      <li><strong>Look first.</strong> <button type="button" class="rampbtn" id="demoOn">Show it with example numbers</button> Nothing is saved.</li>
+      <li><strong>Let Claude fill it.</strong> Go back to the Claude chat where you set up this page and say "update my runway". Setting it up for the first time? Start a new chat with the setup prompt from the kit.</li>
+      <li><strong>Type the basics yourself</strong> in Settings at the bottom of the page. Bank balance, currency and your subscriptions are enough for a first runway.</li>
+    </ol>
+  </section>
+
+  <section class="verdict">
+    <div class="big" id="verdictMonths">&ndash;</div>
+    <div class="vtext" id="verdictText">Add your bank balance and your costs to see how many months you have.</div>
+  </section>
+
+  <section class="kpis">
+    <div class="kpi"><div class="eyebrow">Monthly run rate</div><div class="v" id="kpiRunRate">0</div><div class="sub" id="kpiRunSub">What leaves the bank every month, VAT included</div></div>
+    <div class="kpi"><div class="eyebrow">Spent since start</div><div class="v" id="kpiSpent">0</div><div class="sub" id="kpiSpentSub">Business costs in the register</div></div>
+    <div class="kpi warn"><div class="eyebrow">To break even</div><div class="v" id="kpiBreakeven">0</div><div class="sub" id="kpiBreakevenSub">Revenue per month ex VAT, including your pay</div></div>
+    <div class="kpi good"><div class="eyebrow">VAT you can reclaim</div><div class="v" id="kpiVat">0</div><div class="sub" id="kpiVatSub">Per month, on your recurring costs</div></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Cash month by month</h2>
+        <div class="panel-note">Set what you bill in the first month and how much it grows each month after. Any month can be typed over below the chart. Bars below the line mean the account is overdrawn.</div>
+      </div>
+    </div>
+    <div class="controls" style="margin-bottom:18px">
+      <div class="ctl">
+        <label for="revSlider">Revenue per month, ex VAT</label>
+        <input type="range" id="revSlider" min="0" max="100000" step="500" value="0">
+      </div>
+      <div class="ctl">
+        <label for="revVal">Per month</label>
+        <input type="number" id="revVal" value="0" step="500" min="0" style="width:120px">
+      </div>
+      <div class="ctl">
+        <label for="revStep">Growth per month</label>
+        <input type="number" id="revStep" value="0" step="500" min="0" style="width:120px">
+      </div>
+      <div class="ctl">
+        <label for="revStart">First month with revenue</label>
+        <select id="revStart"></select>
+      </div>
+      <div class="ctl">
+        <label for="drawStart">Your pay starts</label>
+        <select id="drawStart"></select>
+      </div>
+    </div>
+    <svg class="cashchart" id="cashChart" viewBox="0 0 1100 372" role="img"
+         aria-label="Closing cash at the end of each of the next twelve months"></svg>
+    <details class="tableview">
+      <summary>Show the numbers</summary>
+      <div class="tvwrap"><table>
+        <thead><tr><th>Month</th><th class="right">Revenue in</th><th class="right">Costs out</th>
+          <th class="right">To you</th><th class="right">Closing cash</th></tr></thead>
+        <tbody id="cashTbody"></tbody>
+      </table></div>
+    </details>
+    <div class="ramp">
+      <div class="ramp-head">
+        <h3>Revenue plan, month by month</h3>
+        <span class="hint">Type in any month to overrule the plan. The rest keep following it.</span>
+        <span class="savetag" id="saveTag">Saved automatically</span>
+        <button type="button" class="rampbtn" id="rampReset">Clear my overrides</button>
+      </div>
+      <div class="ramp-grid" id="rampGrid"></div>
+    </div>
+    <div class="tfoot">
+      <span id="drawFoot"></span>
+      <span id="cashVerdict"></span>
+    </div>
+    <div class="panel-note" id="month0Note" style="margin-top:10px"></div>
+  </section>
+
+  <section class="grid-2">
+    <div class="panel">
+      <div class="panel-head"><h2>The monthly run rate</h2></div>
+      <div class="panel-note" id="subsNote">Recurring costs, VAT included. Yearly ones are shown per month here and charged in full in the month they renew.</div>
+      <div id="subsList"></div>
+      <div class="tfoot"><span>Total per month</span><span><strong id="subsTotal"></strong></span></div>
+      <details style="margin-top:14px">
+        <summary class="small" style="cursor:pointer">Add a recurring cost</summary>
+        <div class="controls" style="margin-top:12px">
+          <div class="ctl" style="flex:1 1 180px"><label for="sbName">Name</label><input type="text" id="sbName" maxlength="80" style="width:100%"></div>
+          <div class="ctl"><label for="sbAmt">Price ex VAT</label><input type="number" id="sbAmt" min="0" step="1" style="width:110px"></div>
+          <div class="ctl"><label for="sbCur">Currency</label><select id="sbCur"></select></div>
+          <div class="ctl"><label for="sbCad">How often</label><select id="sbCad"><option value="month">Every month</option><option value="year">Once a year</option></select></div>
+          <div class="ctl"><label for="sbVat">Local VAT on top</label><select id="sbVat"><option value="1">Yes</option><option value="0">No</option></select></div>
+          <div class="ctl"><label for="sbNext">Next charge</label><input type="month" id="sbNext"></div>
+          <div class="ctl"><label>&nbsp;</label><button type="button" class="rampbtn" id="sbAdd">Add</button></div>
+        </div>
+      </details>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>What has to come in</h2></div>
+      <div class="panel-note">Two levels. The second one is the real target.</div>
+      <div class="ladder">
+        <div class="rung">
+          <div class="rl"><div class="t">Keep the lights on</div><div class="d">Costs only, nothing out to you. Reclaimable VAT is taken off.</div></div>
+          <div class="rv" id="lvl1"></div>
+        </div>
+        <div class="rung">
+          <div class="rl"><div class="t">What you take out, net in your hand</div>
+          <div class="d">Change this to test a bigger or smaller pay. Everything on the page follows it.</div></div>
+          <div class="ctl" style="flex:0 0 auto">
+            <label for="drawNet">Per month net, all founders</label>
+            <input type="number" id="drawNet" value="0" step="500" min="0" style="width:130px">
+          </div>
+        </div>
+        <div class="rung target">
+          <div class="rl"><div class="t" id="lvl3label">Costs plus your pay</div><div class="d" id="lvl3note"></div></div>
+          <div class="rv" id="lvl3"></div>
+        </div>
+      </div>
+      <div class="tfoot" style="margin-top:14px"><span id="dealNote"></span></div>
+    </div>
+  </section>
+
+  <section class="panel" id="whatifPanel">
+    <div class="panel-head">
+      <div>
+        <h2>Before you buy it</h2>
+        <div class="panel-note">Test a purchase before you commit. Everything above recalculates with it included. Nothing is booked.</div>
+      </div>
+    </div>
+    <div class="controls" style="margin-bottom:16px">
+      <div class="ctl" style="flex:1 1 220px"><label for="wiName">What is it</label><input type="text" id="wiName" maxlength="80" placeholder="New laptop, a course..." style="width:100%"></div>
+      <div class="ctl"><label for="wiAmt">Price ex VAT</label><input type="number" id="wiAmt" value="0" step="10" min="0" style="width:130px"></div>
+      <div class="ctl"><label for="wiCur">Currency</label><select id="wiCur"></select></div>
+      <div class="ctl"><label for="wiKind">How often</label><select id="wiKind"><option value="month">Every month</option><option value="once">One time</option><option value="year">Once a year</option></select></div>
+      <div class="ctl"><label for="wiVat">Local VAT on top</label><select id="wiVat"><option value="1">Yes</option><option value="0">No</option></select></div>
+      <div class="ctl"><label for="wiStart">Starts</label><select id="wiStart"></select></div>
+      <div class="ctl"><label>&nbsp;</label><button type="button" class="rampbtn" id="wiAdd">Add to the test</button></div>
+    </div>
+    <div id="wiList" class="wilist"></div>
+    <div id="wiVerdict" class="wiverdict" hidden></div>
+  </section>
+
+  <section class="panel" id="triagePanel">
+    <div class="panel-head">
+      <div>
+        <h2>Receipts that need a decision</h2>
+        <div class="panel-note">Everything Claude could not place on its own. One click each: business or private. Photo receipts show the picture. Your answers are saved here and Claude reads them back next time.</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      <button type="button" class="dlall" id="dlAll" hidden>Download every receipt</button>
+      <button type="button" class="dlall" id="dlBiz" hidden>Download only business receipts</button>
+    </div>
+    <div id="triageState" class="rstate">Loading receipts...</div>
+    <div class="rgrid" id="triageOpen"></div>
+    <div class="rtally" id="triageTally" hidden></div>
+    <details id="triageDoneWrap" hidden style="margin-top:18px">
+      <summary style="cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.08em;color:var(--ink-3)">DECIDED</summary>
+      <div class="rgrid" id="triageDone" style="margin-top:12px"></div>
+    </details>
+  </section>
+
+  <section class="panel" id="qaPanel" hidden>
+    <div class="panel-head">
+      <div>
+        <h2>Double-check</h2>
+        <div class="panel-note">Each receipt is read more than once. A number only counts as confirmed when the readings agree and the sums add up. Anything they disagree on lands here instead of quietly going into the numbers.</div>
+      </div>
+    </div>
+    <div class="qastrip">
+      <div class="qahead"><h3>Needs your eyes</h3><span id="qaTally" class="qabadge"></span></div>
+      <div class="qalist" id="qaList"></div>
+      <details id="qaDoneWrap" hidden style="margin-top:14px">
+        <summary style="cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--ink-3)">SIGNED OFF (<span id="qaDoneCount">0</span>)</summary>
+        <div class="qalist" id="qaDone" style="margin-top:10px"></div>
+      </details>
+    </div>
+  </section>
+
+  <section class="panel" id="owedPanel" hidden>
+    <div class="panel-head"><div><h2>Money owed to you</h2>
+      <div class="panel-note">Invoices you have sent that are not paid yet. Each one is added to the cash chart in the month you expect it. Overdue ones are counted in the current month, so chase them. Invoices more than 60 days late are left out of the forecast until they are paid.</div></div></div>
+    <div id="owedList"></div>
+    <div class="tfoot"><span>Total owed</span><span><strong id="owedTotal"></strong></span></div>
+  </section>
+
+  <section class="duestrip" id="dueStrip" hidden>
+    <h3 style="margin-bottom:4px">Bills waiting to be paid</h3>
+    <div class="panel-note" style="margin-bottom:6px">Card charges settle themselves. These are the ones you have to move money for. Overdue bills are charged in the current month on the chart.</div>
+    <div id="dueList"></div>
+  </section>
+
+  <section class="mvstrip" id="mvStrip" hidden>
+    <h3 style="margin-bottom:4px">Missing receipts</h3>
+    <div class="panel-note" style="margin-bottom:6px">Charges with no receipt or invoice attached yet.</div>
+    <div id="mvList"></div>
+  </section>
+
+  <section class="filterbar" aria-label="Filters">
+    <p class="fnote">One set of filters for everything below.</p>
+    <div class="controls" style="gap:22px">
+      <div class="ctl"><label>Month</label><div class="chips" id="fMonth"></div></div>
+      <div class="ctl"><label>Category</label><div class="chips" id="fCat"></div></div>
+      <div class="ctl"><label>Belongs to</label><div class="chips" id="fWho"></div></div>
+    </div>
+  </section>
+
+  <section class="grid-2">
+    <div class="panel">
+      <div class="panel-head"><h2>Where the money goes</h2></div>
+      <div class="panel-note">What the filters have selected, split by category. The five biggest get their own colour, the rest share one band. Every amount is written out underneath.</div>
+      <div style="display:flex;gap:20px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px">
+        <div style="flex:1 1 220px">
+          <div class="eyebrow">Total shown</div>
+          <div style="font-family:Archivo,sans-serif;font-size:28px;font-weight:600;letter-spacing:-.02em" id="donutTotal">0</div>
+        </div>
+        <label class="pattoggle"><input type="checkbox" id="patToggle">Patterns</label>
+      </div>
+      <div class="compwrap" id="compBar" role="img" aria-label="Spend split by category"></div>
+      <div class="compscale"><span>0 %</span><span>100 %</span></div>
+      <div class="legend" id="donutLegend"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Biggest suppliers</h2></div>
+      <div class="panel-note">Actual charges in the selected slice, largest first.</div>
+      <div class="vbars" id="vendorBars"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div><h2>Expense register</h2>
+      <div class="panel-note">Click a column heading to sort. Click a row to open its receipt. The Paid column is a toggle.</div></div>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr>
+          <th></th>
+          <th data-sort="date">Date</th>
+          <th data-sort="vendor">Vendor</th>
+          <th data-sort="desc">What</th>
+          <th data-sort="cur">Cur</th>
+          <th class="right" data-sort="amt">Amount</th>
+          <th class="right" data-sort="base" id="thBase">Base</th>
+          <th data-sort="cat">Category</th>
+          <th data-sort="who">Belongs to</th>
+          <th data-sort="paid">Paid</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="tfoot">
+      <span><strong id="rowCount">0</strong> lines shown</span>
+      <span>Total <strong id="rowTotal">0</strong></span>
+    </div>
+  </section>
+
+  <section class="panel" id="openQuestions">
+    <div class="panel-head"><h2>Before these numbers are final</h2></div>
+    <div class="panel-note">Questions Claude could not answer on its own. Answer them here and the numbers move with you.</div>
+    <div id="qState" class="rstate">No questions yet.</div>
+    <div class="qlist2" id="qOpen"></div>
+    <details id="qDoneWrap" hidden style="margin-top:16px">
+      <summary style="cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.08em;color:var(--ink-3)">ANSWERED</summary>
+      <div class="qlist2" id="qDone" style="margin-top:12px"></div>
+    </details>
+  </section>
+
+  <section class="panel" id="settingsPanel">
+    <div class="panel-head"><div><h2>Settings</h2>
+      <div class="panel-note">Claude fills these during setup. You can change them here any time. Rates are yours to check: this page does not know your local tax rules, so ask your accountant.</div></div></div>
+    <div class="setgrid">
+      <div class="ctl"><label for="stName">Business name</label><input type="text" id="stName" maxlength="80"></div>
+      <div class="ctl"><label for="stCur">Your currency (ISO code)</label><input type="text" id="stCur" maxlength="3" placeholder="EUR"></div>
+      <div class="ctl"><label for="stLocale">Number format</label><select id="stLocale">
+        <option value="en-US">1,234.56 (en-US)</option><option value="en-GB">1,234.56 (en-GB)</option>
+        <option value="de-DE">1.234,56 (de-DE)</option><option value="da-DK">1.234,56 (da-DK)</option>
+        <option value="sv-SE">1 234,56 (sv-SE)</option><option value="nb-NO">1 234,56 (nb-NO)</option>
+        <option value="fr-FR">1 234,56 (fr-FR)</option><option value="nl-NL">1.234,56 (nl-NL)</option></select></div>
+      <div class="ctl"><label for="stVat">VAT rate, percent (0 if not registered)</label><input type="number" id="stVat" min="0" max="50" step="0.5"></div>
+      <div class="ctl"><label for="stTax">Tax to set aside on your pay, percent</label><input type="number" id="stTax" min="0" max="80" step="1"></div>
+      <div class="ctl"><label for="stFounders">Founders taking pay</label><input type="number" id="stFounders" min="1" max="10" step="1"></div>
+      <div class="ctl"><label for="stDeal">Average deal size, ex VAT</label><input type="number" id="stDeal" min="0" step="100"></div>
+      <div class="ctl"><label for="stStart">Business started</label><input type="text" id="stStart" placeholder="2026-01-15" maxlength="10"></div>
+      <div class="ctl"><label for="stFx">Exchange rates to your currency</label><input type="text" id="stFx" placeholder="USD=0.92, GBP=1.17" maxlength="200"></div>
+    </div>
+    <div class="small" id="fxNote" style="margin-top:10px"></div>
+  </section>
+
+  <div class="foot">Business Runway, a free template from Brinvik. Numbers are a planning aid, not accounting or tax advice. Your data stays in this artifact's own store and is never sent to Brinvik.</div>
+</div>
+
+<div class="viz-tip" id="vizTip" role="status" aria-live="polite" hidden></div>
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Receipt, full size" hidden>
+  <button type="button" class="lbclose" id="lightboxClose">Close</button>
+  <img id="lightboxImg" alt="Receipt, full size">
+</div>
+<script>
+(function(){
+  "use strict";
+  /* ================= helpers ================= */
+  function $(id){ return document.getElementById(id); }
+  function esc(t){ return String(t==null?"":t).replace(/[&<>"']/g,function(c){
+    return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]; }); }
+  function num(v, d){ var n = Number(v); return isFinite(n) ? n : (d===undefined?0:d); }
+  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+  /* only real image data URIs get into an <img src>. Anything else is dropped. */
+  function safeImg(t){ return (typeof t === "string" && /^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+\/=\s]+$/.test(t)) ? t : ""; }
+  function safeMime(m){ return (typeof m === "string" && /^[a-z]+\/[a-z0-9.+-]+$/i.test(m)) ? m : "application/octet-stream"; }
+  function pad2(n){ return String(n).padStart(2,"0"); }
+  function localISO(d){ d = d || new Date(); return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate()); }
+  function plusDaysISO(n){ var d = new Date(); d.setDate(d.getDate()+n); return localISO(d); }
+  function ymOf(s){ s = String(s||""); return /^\d{4}-\d{2}/.test(s) ? s.slice(0,7) : ""; }
+  function ymAdd(ym, k){ var y = +ym.slice(0,4), m = +ym.slice(5,7)-1+k; return (y+Math.floor(m/12))+"-"+pad2(((m%12)+12)%12+1); }
+  function ymDiff(a, b){ return (+b.slice(0,4) - +a.slice(0,4))*12 + (+b.slice(5,7) - +a.slice(5,7)); }
+
+  /* ================= state ================= */
+  var HORIZON = 36;                       /* months simulated for the runway figure */
+  var NOW_YM = ymOf(localISO());
+  var MONTHS = []; for(var i0=0;i0<HORIZON;i0++) MONTHS.push(ymAdd(NOW_YM, i0));
+  var MONTH_KEYS_12 = MONTHS.slice(0,12);
+
+  var DEFAULT_CFG = {name:"", currency:"EUR", locale:"en-US", vat:25, reclaim:true, tax:30, deal:0, start:"", fx:{}, founders:1};
+  var DEFAULT_PLAN = {bank:0, drawNet:0, rev:0, step:0, revStart:ymAdd(NOW_YM,1), drawStart:"never", overrides:{}, whatif:[]};
+
+  var REAL = {receipts:{}, questions:{}, subs:{}, owed:{}, config:null, plan:null, loaded:false};
+  var DEMO = false, DEMODATA = null;
+  function D(){ return DEMO ? DEMODATA : REAL; }
+  function cleanFx(fx){
+    var out = {};
+    if(!fx || typeof fx !== "object" || Array.isArray(fx)) return out;
+    Object.keys(fx).forEach(function(k){
+      var code = String(k).toUpperCase(), v = Number(fx[k]);
+      if(/^[A-Z]{3}$/.test(code) && isFinite(v) && v > 0) out[code] = v;
+    });
+    return out;
+  }
+  function CFG(){ var c = D().config || {}; var o = {}; Object.keys(DEFAULT_CFG).forEach(function(k){ o[k] = (c[k]!==undefined && c[k]!==null) ? c[k] : DEFAULT_CFG[k]; }); o.fx = cleanFx(o.fx); return o; }
+  var PLAN = JSON.parse(JSON.stringify(DEFAULT_PLAN));
+
+  function VAT(){ return clamp(num(CFG().vat),0,100)/100; }
+  function TAX(){ return clamp(num(CFG().tax),0,95)/100; }
+  function BASE(){ var c = String(CFG().currency||"EUR").toUpperCase(); return /^[A-Z]{3}$/.test(c) ? c : "EUR"; }
+  function rate(cur){
+    cur = String(cur||BASE()).toUpperCase();
+    if(cur === BASE()) return 1;
+    var r = num((CFG().fx||{})[cur], NaN);
+    return r > 0 ? r : NaN;
+  }
+  function toBase(amount, cur){ var r = rate(cur); return isFinite(r) ? amount*r : amount; }
+  function missingRates(){
+    var need = {};
+    subsAll().forEach(function(s){ if(!isFinite(rate(s.currency))) need[String(s.currency).toUpperCase()] = 1; });
+    PLAN.whatif.forEach(function(w){ if(!isFinite(rate(w.cur))) need[String(w.cur).toUpperCase()] = 1; });
+    return Object.keys(need);
+  }
+
+  var FMT = null, FMTKEY = "";
+  function fmt(){
+    var key = CFG().locale + "|" + BASE();
+    if(FMT && FMTKEY === key) return FMT;
+    FMTKEY = key;
+    try { FMT = new Intl.NumberFormat(CFG().locale, {style:"currency", currency:BASE(), maximumFractionDigits:0, minimumFractionDigits:0}); }
+    catch(e){ FMT = {format:function(n){ return Math.round(n).toLocaleString() + " " + BASE(); }}; }
+    return FMT;
+  }
+  function money(n){ var v = Math.round(num(n)); return fmt().format(v === 0 ? 0 : v); }
+  function nb(n,d){ try { return num(n).toLocaleString(CFG().locale,{minimumFractionDigits:d||0,maximumFractionDigits:d||0}); } catch(e){ return num(n).toFixed(d||0); } }
+  function mLabel(ym){ try { return new Date(+ym.slice(0,4), +ym.slice(5,7)-1, 1).toLocaleDateString(CFG().locale,{month:"short", year:"2-digit"}); } catch(e){ return ym; } }
+  function mLong(ym){ try { return new Date(+ym.slice(0,4), +ym.slice(5,7)-1, 1).toLocaleDateString(CFG().locale,{month:"long", year:"numeric"}); } catch(e){ return ym; } }
+
+  /* ================= subscriptions ================= */
+  function subsAll(){
+    var out = [];
+    var S = D().subs;
+    Object.keys(S).forEach(function(id){
+      var s = S[id] || {};
+      out.push({
+        id:id, name:String(s.name||"Unnamed"), what:String(s.what||""), amount:Math.max(0,num(s.amount)),
+        currency:String(s.currency||BASE()).toUpperCase(), cadence:s.cadence==="year"?"year":"month",
+        vat:s.vat===true, next:ymOf(s.nextCharge), active:s.active!==false,
+        aliases:Array.isArray(s.aliases)?s.aliases.map(String):[], receiptId:String(s.receiptId||""),
+        questionId:String(s.questionId||""), dropOn:String(s.dropOn||"")
+      });
+    });
+    return out;
+  }
+  function chargeIncl(s){ return toBase(s.amount, s.currency) * (s.vat ? 1+VAT() : 1); }
+  function perMonth(s){ return chargeIncl(s) / (s.cadence==="year" ? 12 : 1); }
+  function reclaimPerMonth(s){ return (s.vat && CFG().reclaim) ? toBase(s.amount, s.currency)*VAT()/(s.cadence==="year"?12:1) : 0; }
+  function subActive(s){
+    if(!s.active) return false;
+    if(s.receiptId && D().receipts[s.receiptId] && D().receipts[s.receiptId].status === "private") return false;
+    if(s.questionId && s.dropOn && D().questions[s.questionId] && D().questions[s.questionId].answer === s.dropOn) return false;
+    return true;
+  }
+  function activeSubs(){ return subsAll().filter(subActive); }
+  function words(t){ return String(t||"").toLowerCase().split(/[^a-z0-9\u00c0-\u024f]+/).filter(Boolean); }
+  /* a name matches when all its words appear as whole words in the other, and it is at least 3 letters long */
+  function containsWords(hay, needle){
+    var h = words(hay), n = words(needle);
+    if(!n.length || n.join("").length < 3) return false;
+    return n.every(function(w){ return h.indexOf(w) >= 0; });
+  }
+  function subMatches(s, vendor){
+    if(!vendor) return false;
+    return [s.name].concat(s.aliases).some(function(a){ return containsWords(vendor, a) || containsWords(a, vendor); });
+  }
+
+  /* ================= what if ================= */
+  function wiCost(w){ return toBase(num(w.amt), w.cur) * (w.vat ? 1+VAT() : 1); }
+  function wiReclaim(w){ return (w.vat && CFG().reclaim) ? toBase(num(w.amt), w.cur)*VAT() : 0; }
+  function whatifRun(){ return PLAN.whatif.reduce(function(a,w){ return a + (w.kind==="month" ? wiCost(w) : w.kind==="year" ? wiCost(w)/12 : 0); },0); }
+  function whatifReclaim(){ return PLAN.whatif.reduce(function(a,w){ return a + (w.kind==="month" ? wiReclaim(w) : w.kind==="year" ? wiReclaim(w)/12 : 0); },0); }
+  /* cash timing: monthly every month from start, yearly in full every 12 months from start, once in its month */
+  function whatifCash(ym){
+    return PLAN.whatif.reduce(function(a,w){
+      var st = ymOf(w.start) || NOW_YM, d = ymDiff(st, ym);
+      if(d < 0) return a;
+      if(w.kind==="month") return a + wiCost(w);
+      if(w.kind==="year")  return a + (d % 12 === 0 ? wiCost(w) : 0);
+      return a + (d === 0 ? wiCost(w) : 0);
+    },0);
+  }
+
+  /* ================= register rows ================= */
+  function allRows(){
+    var out = [], R = D().receipts, start = String(CFG().start||"");
+    Object.keys(R).forEach(function(id){
+      var d = R[id];
+      if(!d || d.inRegister === false) return;
+      var cur = String(d.currency || BASE()).toUpperCase();
+      var base = num(d.amountBase);
+      out.push({
+        id:id, date:String(d.date||""), vendor:String(d.vendor||""), desc:String(d.description||""),
+        cur:cur, amt:(d.amountOrig!==undefined && d.amountOrig!==null) ? num(d.amountOrig) : base,
+        base:base, cat:String(d.category||"Uncategorised"), vatBase:num(d.vatBase),
+        who: d.status==="business" ? "Business" : (d.status==="private" ? "Private" : "Open"),
+        open: d.status!=="business" && d.status!=="private",
+        paid: d.paid === true, due: String(d.dueDate||""), hasFile: d.hasFile === true, note: String(d.note||""),
+        pre: !!(start && String(d.date||"9999") < start)
+      });
+    });
+    return out;
+  }
+  function unpaidRows(){ return allRows().filter(function(e){ return !e.paid && e.who !== "Private" && e.base > 0; }); }
+  function unpaidTotal(){ return unpaidRows().reduce(function(a,e){ return a+e.base; },0); }
+  function CASH0(){ return num(PLAN.bank); }
+  function freeCash(){ return CASH0() - unpaidTotal(); }
+
+  /* unpaid bills by the month they hit the account. Overdue ones land in the current month. */
+  function unpaidByMonth(){
+    var out = {};
+    unpaidRows().forEach(function(e){
+      var m = ymOf(e.due) || ymOf(e.date);
+      if(!m) m = NOW_YM;
+      if(m < NOW_YM) m = NOW_YM;
+      var d = D().receipts[e.id] || {};
+      (out[m] = out[m] || []).push({id:e.id, base:e.base, vendor:e.vendor, covers: ymOf(d.coversMonth) || m, overdue: !!(e.due && e.due < localISO())});
+    });
+    return out;
+  }
+  /* invoices sent and not paid yet, by the month the money should land */
+  function owedRows(){
+    var O = D().owed || {}, out = [];
+    Object.keys(O).forEach(function(id){
+      var o = O[id]; if(!o || o.paid === true) return;
+      var amt = Math.max(0, num(o.amountBase)); if(!amt) return;
+      var exp = String(o.expectedDate || o.dueDate || "");
+      out.push({id:id, client:String(o.client||""), desc:String(o.description||""), amount:amt, expected:exp,
+                overdue: !!(exp && exp < localISO()), doubtful: !!(exp && exp < plusDaysISO(-60))});
+    });
+    return out.sort(function(a,b){ return a.expected.localeCompare(b.expected); });
+  }
+  function owedByMonth(){
+    var out = {};
+    owedRows().forEach(function(o){
+      if(o.doubtful) return;   /* 60+ days late: not counted as cash that will arrive */
+      var m = ymOf(o.expected) || NOW_YM; if(m < NOW_YM) m = NOW_YM;
+      out[m] = (out[m] || 0) + o.amount;
+    });
+    return out;
+  }
+  function paidThisMonthFor(s){
+    var R = D().receipts;
+    return Object.keys(R).some(function(id){
+      var d = R[id];
+      if(!d || d.inRegister === false || d.paid !== true || d.status === "private") return false;
+      if(ymOf(d.date) !== NOW_YM || !subMatches(s, d.vendor)) return false;
+      var a = Math.abs(num(d.amountBase)), want = chargeIncl(s);
+      return want > 0 && Math.abs(a - want) <= want*0.4;
+    });
+  }
+
+  /* ================= the projection: one source of truth for every number ================= */
+  function drawCost(){ var n = Math.max(0, num(PLAN.drawNet)); return n / (1 - TAX()); }
+  function planRev(ym){
+    var rs = ymOf(PLAN.revStart) || NOW_YM;
+    var d = ymDiff(rs, ym);
+    if(d < 0) return 0;
+    return Math.max(0,num(PLAN.rev)) + Math.max(0,num(PLAN.step))*d;
+  }
+  function revFor(ym, zeroRevenue){
+    if(zeroRevenue) return 0;
+    var o = PLAN.overrides || {};
+    return Object.prototype.hasOwnProperty.call(o, ym) ? Math.max(0,num(o[ym])) : planRev(ym);
+  }
+  function projectDetail(n, opts){
+    opts = opts || {};
+    var cash = CASH0(), out = [];
+    var subs = activeSubs(), due = unpaidByMonth(), owed = owedByMonth();
+    var allBills = []; Object.keys(due).forEach(function(k){ allBills = allBills.concat(due[k]); });
+    var ds = PLAN.drawStart === "never" ? null : (ymOf(PLAN.drawStart) || NOW_YM);
+    var wiSaved = PLAN.whatif; if(opts.noWhatif) PLAN.whatif = [];
+    try {
+      for(var i=0;i<n;i++){
+        var m = MONTHS[i] || ymAdd(NOW_YM,i), costs = 0, bills = due[m] || [];
+        subs.forEach(function(s){
+          /* a real invoice already covers this supplier for this month */
+          if(allBills.some(function(b){
+            var want = chargeIncl(s);
+            return b.covers === m && subMatches(s, b.vendor) && want > 0 && Math.abs(b.base - want) <= want * 0.5;
+          })) return;
+          if(s.cadence === "month"){
+            if(i === 0 && paidThisMonthFor(s)) return;
+            costs += chargeIncl(s);
+          } else {
+            if(!s.next){ costs += perMonth(s); return; }          /* no renewal month known: spread it */
+            var k = ymDiff(s.next, m);
+            if(k >= 0 && k % 12 === 0 && !(i === 0 && paidThisMonthFor(s))) costs += chargeIncl(s);
+          }
+        });
+        bills.forEach(function(b){ costs += b.base; });
+        costs += whatifCash(m);
+        var draw = (ds && m >= ds) ? drawCost() : 0;
+        var rev = revFor(m, opts.zeroRevenue) + (owed[m] || 0);   /* money already invoiced still arrives */
+        cash = cash + rev - costs - draw;
+        out.push({ym:m, rev:rev, opex:costs, draw:draw, close:cash});
+      }
+    } finally { PLAN.whatif = wiSaved; }
+    return out;
+  }
+  function firstNegative(det){ for(var i=0;i<det.length;i++) if(det[i].close < 0) return i; return -1; }
+  /* months until the account crosses zero with no revenue, interpolated inside the month */
+  function runwayMonths(){
+    var det = projectDetail(HORIZON, {zeroRevenue:true});
+    var prev = CASH0();
+    for(var i=0;i<det.length;i++){
+      if(det[i].close < 0){
+        var used = prev - det[i].close;
+        return i + (used > 0 ? clamp(prev/used,0,1) : 0);
+      }
+      prev = det[i].close;
+    }
+    return Infinity;
+  }
+  function runRate(){ return activeSubs().reduce(function(a,s){ return a+perMonth(s); },0) + whatifRun(); }
+  function baseRunRate(){ return activeSubs().reduce(function(a,s){ return a+perMonth(s); },0); }
+  function reclaim(){ return activeSubs().reduce(function(a,s){ return a+reclaimPerMonth(s); },0) + whatifReclaim(); }
+  function lvl1(){ return runRate() - reclaim(); }
+  function lvl3(){ return lvl1() + drawCost(); }
+
+  /* ================= tooltip layer ================= */
+  var SERIES = ["var(--s1)","var(--s2)","var(--s3)","var(--s4)","var(--s5)"], TAIL = "var(--s6)";
+  var TIP = $("vizTip");
+  function tipAt(x,y){
+    TIP.hidden = false;
+    var r = TIP.getBoundingClientRect(), vw = window.innerWidth, vh = window.innerHeight;
+    var left = x + 16, top = y + 18;
+    if(left + r.width > vw - 8) left = x - r.width - 16;
+    if(left < 8) left = 8;
+    if(top + r.height > vh - 8) top = y - r.height - 18;
+    if(top < 8) top = 8;
+    TIP.style.left = left + "px"; TIP.style.top = top + "px";
+  }
+  function showTip(title, rows, foot, x, y){
+    while(TIP.firstChild) TIP.removeChild(TIP.firstChild);
+    var h = document.createElement("div"); h.className = "tt"; h.textContent = title; TIP.appendChild(h);
+    var dl = document.createElement("dl");
+    rows.forEach(function(r){
+      var k = document.createElement("span"); k.className = "k" + (r.square ? " sq" : ""); k.style.background = r.color || "transparent";
+      var dt = document.createElement("dt"); dt.textContent = r.name;
+      var dd = document.createElement("dd"); dd.textContent = r.value;
+      dl.appendChild(k); dl.appendChild(dt); dl.appendChild(dd);
+    });
+    TIP.appendChild(dl);
+    if(foot){ var f = document.createElement("div"); f.className = "foot"; f.textContent = foot; TIP.appendChild(f); }
+    tipAt(x,y);
+  }
+  function hideTip(){ TIP.hidden = true; }
+  function centreOf(el){ var r = el.getBoundingClientRect(); return [r.left + r.width/2, r.top + r.height/2]; }
+  window.addEventListener("scroll", hideTip, true);
+  function tokenHex(v){ var name = String(v).replace(/^var\(|\)$/g,""); return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || "#000000"; }
+  function lum(hex){
+    var m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex.trim()); if(!m) return 0;
+    var c = [1,2,3].map(function(i){ var v = parseInt(m[i],16)/255; return v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); });
+    return 0.2126*c[0] + 0.7152*c[1] + 0.0722*c[2];
+  }
+  function inkOn(varColor){ var L = lum(tokenHex(varColor)); return ((L + 0.05) / 0.05) >= (1.05 / (L + 0.05)) ? "#11181B" : "#FFFFFF"; }
+
+  /* ================= data writes (db, or memory in the example) ================= */
+  var dbRef = null, dl = null, busy = {}, FILES = {};
+  function write(path, patch, merge){
+    var parts = path.split("/"), col = parts[0], id = parts[1];
+    if(DEMO){
+      var map = col === "receipts" ? DEMODATA.receipts : col === "questions" ? DEMODATA.questions : col === "subscriptions" ? DEMODATA.subs : col === "receivables" ? DEMODATA.owed : null;
+      if(map){ map[id] = Object.assign({}, map[id]||{}, patch); }
+      else if(path === "settings/config"){ DEMODATA.config = Object.assign({}, DEMODATA.config||{}, patch); }
+      refreshAll();
+      return Promise.resolve();
+    }
+    if(!dbRef) return Promise.reject(new Error("no store"));
+    return merge === "set" ? dbRef.doc(path).set(patch) : dbRef.doc(path).update(patch);
+  }
+
+  /* ================= header, KPIs, verdict ================= */
+  function paintBank(){
+    var u = unpaidTotal(), f = freeCash(), rows = unpaidRows();
+    $("bankUnpaid").textContent = money(u);
+    $("bankFree").textContent = money(f);
+    $("bankFree").className = "bankv" + (f < 0 ? " warnv" : "");
+    $("curSym").textContent = BASE();
+    var note = $("bankNote");
+    if(!rows.length){ note.textContent = allRows().length ? "Nothing outstanding. Everything in the register is marked paid." : ""; return; }
+    var names = rows.sort(function(a,b){ return (a.due||"9999").localeCompare(b.due||"9999"); })
+      .slice(0,4).map(function(e){ return e.vendor + " " + money(e.base) + (e.due ? " due " + e.due : ""); });
+    note.textContent = rows.length + (rows.length===1?" bill":" bills") + " still to pay: " + names.join(", ") + (rows.length>4?", and more":"") + ".";
+  }
+  function paintKpis(){
+    var biz = allRows().filter(function(e){ return e.who === "Business"; });
+    var since = biz.filter(function(e){ return !e.pre; }).reduce(function(a,e){return a+e.base;},0);
+    var openAmt = allRows().filter(function(e){ return e.who === "Open"; }).reduce(function(a,e){return a+e.base;},0);
+    $("kpiSpent").textContent = money(since);
+    $("kpiSpentSub").textContent = "Decided business costs" + (CFG().start ? " since " + CFG().start : "") + (openAmt ? ". " + money(openAmt) + " still waits for a decision." : ".");
+    $("kpiRunRate").textContent = money(runRate());
+    $("kpiRunSub").textContent = whatifRun() ? "Includes " + money(whatifRun()) + " from the purchase you are testing. Without it: " + money(baseRunRate()) : "What leaves the bank every month, VAT included";
+    $("kpiVat").textContent = money(reclaim());
+    $("kpiVatSub").textContent = CFG().reclaim ? "Per month, on your recurring costs" : "You told the page you do not reclaim VAT";
+    $("kpiBreakeven").textContent = money(lvl3());
+    var mo = runwayMonths(), det12 = projectDetail(12), neg = firstNegative(det12);
+    var big = $("verdictMonths"), txt = $("verdictText");
+    var hasData = CASH0() !== 0 || runRate() > 0 || allRows().length > 0;
+    if(!hasData){ big.textContent = "–"; txt.textContent = "Add your bank balance and your costs to see how many months you have."; return; }
+    big.textContent = mo === Infinity ? HORIZON + "+" : nb(mo, 1);
+    var s1 = mo === Infinity ? "The cash covers more than " + HORIZON + " months, even with nothing coming in." :
+      "months of runway if you win no new work" + (PLAN.drawStart !== "never" && num(PLAN.drawNet) > 0 ? ", with your pay starting " + mLong(ymOf(PLAN.drawStart)||NOW_YM) : "") + ".";
+    var s2 = "";
+    var anyRev = MONTH_KEYS_12.some(function(m){ return revFor(m) > 0; });
+    if(anyRev) s2 = neg < 0 ? " With the revenue plan below, the cash holds all 12 months." : " With the revenue plan below, the cash runs out in " + mLong(det12[neg].ym) + ".";
+    txt.textContent = s1 + s2;
+  }
+  function paintBreakeven(){
+    paintKpis();
+    var L3 = lvl3(), dn = Math.max(0,num(PLAN.drawNet));
+    $("lvl1").textContent = money(lvl1());
+    $("lvl3").textContent = money(L3);
+    var nf = Math.max(1, Math.round(num(CFG().founders, 1)));
+    $("lvl3label").textContent = "Costs plus " + money(dn) + (nf > 1 ? " to the " + nf + " founders" : " to you");
+    $("lvl3note").textContent = "Revenue per month ex VAT. " + money(L3*12) + " a year." + (VAT() > 0 ? " " + money(L3*(1+VAT())) + " on the invoice with VAT." : "");
+    $("kpiBreakevenSub").textContent = "Revenue per month ex VAT to cover costs and " + money(dn) + " net to you";
+    var deal = num(CFG().deal);
+    $("dealNote").textContent = deal > 0 ? "At a " + money(deal) + " average deal, that is " + nb(L3/deal,1) + " deals a month." : "Add your average deal size in Settings to see how many deals that is.";
+    $("drawFoot").textContent = dn > 0
+      ? "Your pay is " + money(dn) + " net, which costs the business " + money(drawCost()) + " with " + nb(TAX()*100) + " % set aside for tax."
+      : "No pay to you is planned. Set it under What has to come in.";
+    drawCash();
+  }
+
+  /* ================= run rate list ================= */
+  function paintSubs(){
+    var host = $("subsList"), subs = subsAll().sort(function(a,b){ return perMonth(b)-perMonth(a); });
+    var max = subs.reduce(function(a,s){ return Math.max(a, perMonth(s)); }, 0) || 1;
+    if(!subs.length){ host.innerHTML = '<div class="rstate">No recurring costs yet. Claude adds them during setup, or add one below.</div>'; }
+    else host.innerHTML = subs.map(function(s){
+      var live = subActive(s), m = perMonth(s), noRate = !isFinite(rate(s.currency));
+      return '<div class="subrow"'+(live?'':' style="opacity:.45"')+'>'+
+        '<div class="sname"><span class="s1">'+esc(s.name)+'</span><span class="s2">'+esc(s.what)+
+          (s.cadence==="year" ? ' &middot; yearly'+(s.next?', renews '+esc(mLabel(s.next)):'') : '')+
+          (noRate ? ' &middot; <span style="color:var(--alarm)">no rate for '+esc(s.currency)+'</span>' : '')+'</span></div>'+
+        '<div class="strack"><div class="sfill" style="width:'+(m/max*100).toFixed(1)+'%"></div></div>'+
+        '<div class="sval">'+(live ? esc(money(m)) : '<s>'+esc(money(m))+'</s>')+
+          '<button type="button" class="subx" data-subx="'+esc(s.id)+'" title="'+(s.active?"Stop counting this":"Count it again")+'">'+(s.active?"&times;":"+")+'</button></div>'+
+      '</div>';
+    }).join("");
+    $("subsTotal").textContent = money(baseRunRate());
+  }
+  $("subsList").addEventListener("click", function(e){
+    var b = e.target.closest("[data-subx]"); if(!b) return;
+    var id = b.getAttribute("data-subx"), s = D().subs[id]; if(!s) return;
+    write("subscriptions/"+id, {active: s.active === false}).catch(function(){});
+  });
+  $("sbAdd").addEventListener("click", function(){
+    var amt = Math.max(0, num($("sbAmt").value)), name = $("sbName").value.trim().slice(0,80);
+    if(!name){ $("sbName").focus(); return; }
+    if(!amt){ $("sbAmt").focus(); return; }
+    var id = "s" + Date.now().toString(36) + Math.floor(Math.random()*1e4).toString(36);
+    var doc = {name:name, what:"Added on the page", amount:amt, currency:$("sbCur").value, cadence:$("sbCad").value,
+               vat:$("sbVat").value==="1", nextCharge:ymOf($("sbNext").value)||"", active:true, addedAt:new Date().toISOString()};
+    if(DEMO){ DEMODATA.subs[id] = doc; refreshAll(); }
+    else if(dbRef){ dbRef.doc("subscriptions/"+id).set(doc).catch(function(){}); }
+    $("sbName").value = ""; $("sbAmt").value = "";
+  });
+
+  /* ================= filters + register ================= */
+  var state = {month:"all", cat:"all", who:"all", sort:"date", dir:-1};
+  function uniq(arr){ var o=[]; arr.forEach(function(x){ if(x && o.indexOf(x)<0) o.push(x); }); return o; }
+  function buildChips(hostId, values, key){
+    var host = $(hostId);
+    if(state[key] !== "all" && values.indexOf(state[key]) < 0) state[key] = "all";
+    host.innerHTML = "";
+    ["all"].concat(values).forEach(function(v){
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "chip"; b.textContent = v === "all" ? "All" : v;
+      b.setAttribute("aria-pressed", String(state[key] === v));
+      b.addEventListener("click", function(){ state[key] = v; render(); });
+      host.appendChild(b);
+    });
+  }
+  /* rebuilt on every render, so a new month or category shows up without a reload */
+  function rebuildChips(){
+    var r = allRows();
+    buildChips("fMonth", uniq(r.map(function(e){ return ymOf(e.date); })).sort(), "month");
+    buildChips("fCat", uniq(r.map(function(e){ return e.cat; })).sort(), "cat");
+    buildChips("fWho", ["Business","Private","Open"], "who");
+  }
+  function filtered(){
+    return allRows().filter(function(e){
+      if(state.month!=="all" && ymOf(e.date)!==state.month) return false;
+      if(state.cat!=="all" && e.cat!==state.cat) return false;
+      if(state.who!=="all" && e.who!==state.who) return false;
+      return true;
+    });
+  }
+  function verdictTag(e){
+    if(e.who === "Business") return '<span class="tag ok">BUSINESS</span>';
+    if(e.who === "Private") return '<span class="tag no">PRIVATE</span>';
+    return '<button type="button" class="tag flag" data-jump="'+esc(e.id)+'">decide &rarr;</button>';
+  }
+  function ageLabel(iso){
+    var t = new Date(iso).getTime();
+    if(!iso || !isFinite(t)) return {txt:"", cls:""};
+    var h = (Date.now() - t)/3600000;
+    if(h >= 72) return {txt: Math.floor(h/24)+" days waiting", cls:"a3"};
+    if(h >= 24) return {txt: Math.floor(h/24)+"d waiting", cls:"a2"};
+    if(h >= 1)  return {txt: Math.floor(h)+"h waiting", cls:"a1"};
+    return {txt:"just now", cls:""};
+  }
+  function paintMissing(){
+    var R = D().receipts, miss = [];
+    Object.keys(R).forEach(function(id){
+      var d = R[id];
+      if(!d || d.inRegister === false || d.hasFile === true || safeImg(d.thumb) || d.source === "photo" || d.voucherNeeded === false || d.status === "private") return;
+      miss.push({id:id, d:d});
+    });
+    $("mvStrip").hidden = miss.length === 0;
+    $("mvList").innerHTML = miss.map(function(m){
+      var a = ageLabel(m.d.addedAt);
+      return '<div class="mvrow"><span><strong>'+esc(m.d.vendor)+'</strong> &middot; '+esc(m.d.date)+' &middot; '+esc(m.d.description)+'</span>'+
+        '<span style="display:flex;gap:12px;align-items:center"><span class="num">'+esc(money(m.d.amountBase))+'</span>'+
+        (a.txt ? '<span class="age '+a.cls+'">'+esc(a.txt)+'</span>' : '')+'</span></div>';
+    }).join("");
+  }
+  function paintDue(){
+    var today = localISO(), soonISO = plusDaysISO(7);
+    var open = allRows().filter(function(e){ return !e.paid && e.due && e.who !== "Private"; }).sort(function(a,b){ return a.due.localeCompare(b.due); });
+    $("dueStrip").hidden = open.length === 0;
+    $("dueList").innerHTML = open.map(function(e){
+      var late = e.due < today, soon = e.due <= soonISO;
+      return '<div class="duerow"><span><strong>'+esc(e.vendor)+'</strong> &middot; '+esc(e.desc)+'</span>'+
+        '<span style="display:flex;gap:14px;align-items:center"><span class="num">'+(e.base ? esc(money(e.base)) : "amount unknown")+'</span>'+
+        '<span class="paidbtn '+(late||soon?"due":"no")+'" style="cursor:default">'+(late?"OVERDUE ":"DUE ")+esc(e.due)+'</span>'+
+        '<button type="button" class="paidbtn" data-paid="'+esc(e.id)+'">Mark paid</button></span></div>';
+    }).join("");
+  }
+  function togglePaid(id){
+    var d = D().receipts[id]; if(!d || busy["p:"+id]) return;
+    if(!DEMO && !dbRef) return;
+    busy["p:"+id] = true;
+    write("receipts/"+id, {paid: d.paid !== true, paidAt: d.paid !== true ? new Date().toISOString() : null})
+      .catch(function(){}).then(function(){ delete busy["p:"+id]; });
+  }
+  $("dueList").addEventListener("click", function(e){ var b = e.target.closest("[data-paid]"); if(b) togglePaid(b.getAttribute("data-paid")); });
+
+  var OPEN_DETAIL = {};
+  function detailHtml(id){
+    var d = D().receipts[id] || {}, img = safeImg(d.thumb);
+    var det = (Array.isArray(d.detail) ? d.detail : []).map(function(r){ return '<dt>'+esc(r&&r[0])+'</dt><dd>'+esc(r&&r[1])+'</dd>'; }).join("");
+    var dlb = d.hasFile === true
+      ? '<button type="button" class="dlbtn" data-dl="'+esc(id)+'"><span class="ext">'+esc(String(d.fileName||"").split(".").pop()||"file")+'</span>'+esc(d.fileName||"Download")+'</button>'
+      : '<span class="rnofile">No file attached to this one.</span>';
+    return '<td colspan="10"><div class="dwrap">'+(img?'<img src="'+esc(img)+'" alt="Receipt" data-zoom="'+esc(id)+'" tabindex="0" role="button" aria-label="Open the receipt full size">':'')+
+      '<div class="dcol">'+(d.note?'<div class="rdesc">'+esc(d.note)+'</div>':'')+(det?'<dl class="rdetail">'+det+'</dl>':'')+
+      '<div class="rdl">'+dlb+'</div></div></div></td>';
+  }
+  $("tbody").addEventListener("click", function(e){
+    var pb = e.target.closest("[data-paid]");
+    if(pb){ e.stopPropagation(); togglePaid(pb.getAttribute("data-paid")); return; }
+    var z = e.target.closest("[data-zoom]"); if(z){ zoom(z.getAttribute("data-zoom")); return; }
+    if(e.target.closest("[data-jump]") || e.target.closest("[data-dl]")) return;
+    var tr = e.target.closest("tr.exp"); if(!tr) return;
+    var id = tr.getAttribute("data-row");
+    if(OPEN_DETAIL[id]){ delete OPEN_DETAIL[id]; } else { OPEN_DETAIL[id] = 1; }
+    render();
+  });
+  document.querySelectorAll("th[data-sort]").forEach(function(th){
+    th.addEventListener("click", function(){
+      var k = th.getAttribute("data-sort");
+      state.dir = (state.sort===k) ? -state.dir : 1; state.sort = k; render();
+    });
+  });
+  function render(){
+    rebuildChips();
+    var rows = filtered().slice(), k = state.sort, dir = state.dir;
+    rows.sort(function(a,b){
+      var x=a[k], y=b[k];
+      if(typeof x==="boolean") return ((x?1:0)-(y?1:0))*dir;
+      if(typeof x==="number") return (x-y)*dir;
+      return String(x).localeCompare(String(y))*dir;
+    });
+    $("thBase").textContent = BASE();
+    var html = rows.map(function(e){
+      var d = D().receipts[e.id] || {};
+      var urgent = !e.paid && e.due && e.due <= plusDaysISO(7);
+      var paidCell = e.paid ? '<button type="button" class="paidbtn yes" data-paid="'+esc(e.id)+'">PAID</button>'
+        : '<button type="button" class="paidbtn '+(urgent?"due":"no")+'" data-paid="'+esc(e.id)+'">'+(e.due?("DUE "+esc(e.due.slice(5))):"UNPAID")+'</button>';
+      var expandable = e.hasFile || e.note || safeImg(d.thumb) || (Array.isArray(d.detail) && d.detail.length);
+      var open = expandable && OPEN_DETAIL[e.id];
+      return '<tr class="exp" data-row="'+esc(e.id)+'">'+
+        '<td class="chev">'+(expandable ? (open?"&#9662;":"&#9656;") : "")+'</td>'+
+        '<td class="num">'+esc(e.date)+'</td><td>'+esc(e.vendor)+'</td><td>'+esc(e.desc)+'</td>'+
+        '<td class="num">'+esc(e.cur)+'</td><td class="num right">'+esc(nb(e.amt,2))+'</td>'+
+        '<td class="num right">'+esc(money(e.base))+'</td><td><span class="tag">'+esc(e.cat)+'</span></td>'+
+        '<td>'+verdictTag(e)+'</td><td>'+paidCell+'</td></tr>'+
+        (open ? '<tr class="detail">'+detailHtml(e.id)+'</tr>' : '');
+    }).join("");
+    $("tbody").innerHTML = html || '<tr><td colspan="10" class="rstate" style="padding:14px">Nothing in the register yet.</td></tr>';
+    Object.keys(OPEN_DETAIL).forEach(function(id){
+      var d = D().receipts[id];
+      if(d && d.hasFile === true){
+        getFile(id).then(function(f){
+          var img = document.querySelector('tr.exp[data-row="'+CSS.escape(id)+'"] + tr.detail img');
+          if(f && img && /^image\//.test(safeMime(f.fileMime))) img.src = "data:"+safeMime(f.fileMime)+";base64,"+String(f.fileData).replace(/[^A-Za-z0-9+\/=]/g,"");
+        });
+      }
+    });
+    $("rowCount").textContent = rows.length;
+    $("rowTotal").textContent = money(rows.reduce(function(a,e){ return a+e.base; },0));
+    paintDue(); paintMissing(); paintQa();
+    drawComposition(rows); drawVendors(rows);
+  }
+
+  /* ================= composition bar ================= */
+  var PATTERNS = false;
+  $("patToggle").addEventListener("change", function(){ PATTERNS = $("patToggle").checked; render(); });
+  function drawComposition(rows){
+    var by = {};
+    rows.forEach(function(e){ by[e.cat] = (by[e.cat]||0) + e.base; });
+    var items = Object.keys(by).map(function(k){ return {cat:k, v:by[k]}; }).filter(function(i){ return i.v > 0; }).sort(function(a,b){ return b.v-a.v; });
+    var total = items.reduce(function(a,i){ return a+i.v; },0);
+    var bar = $("compBar"), lg = $("donutLegend");
+    $("donutTotal").textContent = money(total);
+    bar.innerHTML = ""; lg.innerHTML = "";
+    bar.classList.toggle("pat", PATTERNS);
+    if(total <= 0){
+      var blank = document.createElement("div"); blank.className = "seg"; blank.style.background = "var(--line)"; bar.appendChild(blank);
+      var r0 = document.createElement("div"); r0.className = "legend-row"; r0.style.color = "var(--ink-3)"; r0.textContent = "Nothing in this selection."; lg.appendChild(r0);
+      return;
+    }
+    var shown = items.slice(0,5).map(function(it,i){ return {cat:it.cat, v:it.v, col:SERIES[i], tail:null}; });
+    var rest = items.slice(5);
+    if(rest.length) shown.push({cat:"Everything else", v:rest.reduce(function(a,i){ return a+i.v; },0), col:TAIL, tail:rest});
+    shown.forEach(function(it, i){
+      var pct = it.v/total*100;
+      var seg = document.createElement("div");
+      seg.className = "seg" + (i % 2 ? " alt" : ""); seg.style.background = it.col; seg.style.flexGrow = String(it.v);
+      seg.tabIndex = 0; seg.setAttribute("role","img");
+      seg.setAttribute("aria-label", it.cat + ", " + money(it.v) + ", " + pct.toFixed(0) + " percent");
+      var lab = document.createElement("span"); lab.className = "seglab"; lab.style.color = inkOn(it.col); lab.textContent = pct.toFixed(0) + "%";
+      seg.appendChild(lab);
+      function tip(x,y){ showTip(it.cat, [{color:it.col, square:true, name:"Amount", value:money(it.v)},{color:"transparent", square:true, name:"Share", value:nb(pct,1)+" %"}], it.tail ? it.tail.map(function(t){ return t.cat; }).join(", ") : "", x, y); }
+      seg.addEventListener("pointermove", function(e){ tip(e.clientX, e.clientY); });
+      seg.addEventListener("pointerleave", hideTip);
+      seg.addEventListener("focus", function(){ var c = centreOf(seg); tip(c[0], c[1]); });
+      seg.addEventListener("blur", hideTip);
+      bar.appendChild(seg);
+      var row = document.createElement("div"); row.className = "legend-row";
+      var sw = document.createElement("span"); sw.className = "sw"; sw.style.background = it.col;
+      var nm = document.createElement("span"); nm.textContent = it.tail ? (it.cat + " (" + it.tail.length + ")") : it.cat;
+      var am = document.createElement("span"); am.className = "amt"; am.textContent = money(it.v);
+      var pc = document.createElement("span"); pc.className = "pct"; pc.textContent = pct.toFixed(0) + "%";
+      row.appendChild(sw); row.appendChild(nm); row.appendChild(am); row.appendChild(pc); lg.appendChild(row);
+    });
+    requestAnimationFrame(fitSegLabels);
+  }
+  function fitSegLabels(){
+    Array.prototype.forEach.call($("compBar").querySelectorAll(".seglab"), function(lab){
+      lab.hidden = false; if(lab.scrollWidth + 10 > lab.parentNode.clientWidth) lab.hidden = true;
+    });
+  }
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(fitSegLabels);
+  var fitTimer = null;
+  window.addEventListener("resize", function(){ clearTimeout(fitTimer); fitTimer = setTimeout(fitSegLabels, 120); });
+
+  function drawVendors(rows){
+    var by = {}, cat = {};
+    rows.forEach(function(e){ by[e.vendor] = (by[e.vendor]||0) + e.base; if(!cat[e.vendor]) cat[e.vendor] = e.cat; });
+    var items = Object.keys(by).map(function(k){ return {v:k, n:by[k]}; }).filter(function(i){ return i.n > 0; }).sort(function(a,b){ return b.n-a.n; }).slice(0,15);
+    var host = $("vendorBars"); host.innerHTML = "";
+    if(!items.length){ var e0 = document.createElement("div"); e0.className = "small"; e0.textContent = "Nothing in this selection."; host.appendChild(e0); return; }
+    var max = items[0].n, sum = items.reduce(function(a,i){ return a+i.n; },0);
+    items.forEach(function(it){
+      var row = document.createElement("div"); row.className = "vbar"; row.tabIndex = 0;
+      var nm = document.createElement("div"); nm.className = "name"; nm.textContent = it.v;
+      var tr = document.createElement("div"); tr.className = "track";
+      var fl = document.createElement("div"); fl.className = "fill"; fl.style.width = Math.max(1, it.n/max*100).toFixed(1) + "%"; tr.appendChild(fl);
+      var vl = document.createElement("div"); vl.className = "val"; vl.textContent = money(it.n);
+      row.appendChild(nm); row.appendChild(tr); row.appendChild(vl);
+      function tip(x,y){ showTip(it.v, [{color:"var(--s1)", square:true, name:"Charged", value:money(it.n)},{color:"transparent", square:true, name:"Share", value:nb(it.n/sum*100,1)+" %"}], cat[it.v]||"", x, y); }
+      row.addEventListener("pointermove", function(e){ tip(e.clientX, e.clientY); });
+      row.addEventListener("pointerleave", hideTip);
+      row.addEventListener("focus", function(){ var c = centreOf(row); tip(c[0], c[1]); });
+      row.addEventListener("blur", hideTip);
+      host.appendChild(row);
+    });
+  }
+
+  /* ================= plan controls ================= */
+  var slider = $("revSlider"), revVal = $("revVal"), revStep = $("revStep"), revStart = $("revStart"), drawStart = $("drawStart");
+  function fillMonthSelects(){
+    [revStart, drawStart, $("wiStart")].forEach(function(sel){
+      var keep = sel.value; sel.innerHTML = "";
+      MONTH_KEYS_12.forEach(function(m){ var o = document.createElement("option"); o.value = m; o.textContent = mLabel(m); sel.appendChild(o); });
+      if(sel === drawStart){ var o2 = document.createElement("option"); o2.value = "never"; o2.textContent = "Not yet"; sel.appendChild(o2); }
+      if(keep) sel.value = keep;
+    });
+    ["sbCur","wiCur"].forEach(function(id){
+      var sel = $(id), keep = sel.value, curs = uniq([BASE()].concat(Object.keys(CFG().fx||{}).map(function(c){ return String(c).toUpperCase(); })));
+      sel.innerHTML = curs.map(function(c){ return '<option value="'+esc(c)+'">'+esc(c)+'</option>'; }).join("");
+      if(keep && curs.indexOf(keep) >= 0) sel.value = keep;
+    });
+  }
+  /* a saved month that has already passed still selects sensibly: it snaps to this month */
+  function selectMonth(sel, ym, allowNever){
+    if(allowNever && ym === "never"){ sel.value = "never"; return; }
+    ym = ymOf(ym) || NOW_YM;
+    if(ym < NOW_YM) ym = NOW_YM;
+    if(MONTH_KEYS_12.indexOf(ym) < 0){
+      var o = document.createElement("option"); o.value = ym; o.textContent = mLabel(ym); sel.appendChild(o);
+    }
+    sel.value = ym;
+  }
+  function planToInputs(){
+    var act = document.activeElement;
+    function set(el, v){ if(el !== act) el.value = String(v); }
+    set($("bankInput"), num(PLAN.bank));
+    set($("drawNet"), num(PLAN.drawNet));
+    set(revVal, num(PLAN.rev)); if(slider !== act) slider.value = String(Math.min(100000, num(PLAN.rev)));
+    set(revStep, num(PLAN.step));
+    selectMonth(revStart, PLAN.revStart, false);
+    selectMonth(drawStart, PLAN.drawStart, true);
+  }
+  function onPlanInput(){
+    PLAN.bank = num($("bankInput").value);
+    PLAN.drawNet = Math.max(0, num($("drawNet").value));
+    PLAN.rev = Math.max(0, num(revVal.value));
+    PLAN.step = Math.max(0, num(revStep.value));
+    PLAN.revStart = revStart.value; PLAN.drawStart = drawStart.value;
+    refreshNumbers(); queueSave();
+  }
+  slider.addEventListener("input", function(){ revVal.value = slider.value; onPlanInput(); });
+  revVal.addEventListener("input", function(){ slider.value = String(Math.min(100000, Math.max(0,num(revVal.value)))); onPlanInput(); });
+  [revStep, $("bankInput"), $("drawNet")].forEach(function(el){ el.addEventListener("input", onPlanInput); });
+  [revStart, drawStart].forEach(function(el){ el.addEventListener("change", onPlanInput); });
+  $("rampReset").addEventListener("click", function(){ PLAN.overrides = {}; refreshNumbers(); queueSave(); });
+
+  var rampBuilt = false;
+  function paintRamp(){
+    var grid = $("rampGrid"), rs = ymOf(PLAN.revStart) || NOW_YM, act = document.activeElement;
+    if(!rampBuilt){
+      grid.innerHTML = MONTH_KEYS_12.map(function(m){
+        return '<div class="rcell" data-cell="'+m+'"><span>'+esc(mLabel(m))+'</span><input type="number" step="500" min="0" class="rampin" data-m="'+m+'" aria-label="'+esc(mLong(m))+', revenue ex VAT"></div>';
+      }).join("");
+      rampBuilt = true;
+    }
+    MONTH_KEYS_12.forEach(function(m){
+      var cell = grid.querySelector('[data-cell="'+m+'"]'), inp = cell.querySelector("input");
+      cell.className = "rcell" + (Object.prototype.hasOwnProperty.call(PLAN.overrides||{}, m) ? " ovr" : "") + (m < rs ? " off" : "");
+      if(inp !== act) inp.value = String(Math.round(revFor(m)));
+    });
+  }
+  $("rampGrid").addEventListener("input", function(e){
+    var inp = e.target.closest(".rampin"); if(!inp) return;
+    var m = inp.getAttribute("data-m"), v = Math.max(0, num(inp.value));
+    PLAN.overrides = PLAN.overrides || {};
+    if(inp.value === "" || Math.abs(v - planRev(m)) < 0.5) delete PLAN.overrides[m]; else PLAN.overrides[m] = v;
+    refreshNumbers(); queueSave();
+  });
+
+  /* ================= cash chart ================= */
+  function niceStep(x){ if(!(x > 0)) return 1; var e = Math.pow(10, Math.floor(Math.log(x)/Math.LN10)), f = x/e; return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*e; }
+  function barPath(x,w,yTop,yBot,up){
+    var r = Math.min(4, w/2, Math.abs(yBot-yTop)), x2 = x+w;
+    if(up) return "M"+x+","+yBot+" L"+x+","+(yTop+r)+" Q"+x+","+yTop+" "+(x+r)+","+yTop+" L"+(x2-r)+","+yTop+" Q"+x2+","+yTop+" "+x2+","+(yTop+r)+" L"+x2+","+yBot+" Z";
+    return "M"+x+","+yTop+" L"+x+","+(yBot-r)+" Q"+x+","+yBot+" "+(x+r)+","+yBot+" L"+(x2-r)+","+yBot+" Q"+x2+","+yBot+" "+x2+","+(yBot-r)+" L"+x2+","+yTop+" Z";
+  }
+  function drawCash(){
+    var det = projectDetail(12), vals = det.map(function(d){ return d.close; });
+    var svg = $("cashChart"), W=1100, H=372, padL=100, padR=24, padT=36, padB=68, iw=W-padL-padR, ih=H-padT-padB;
+    var hi = Math.max.apply(null, vals.concat([CASH0(), 0])), lo = Math.min.apply(null, vals.concat([0]));
+    var raw = (hi-lo) || 1, step = niceStep(raw/4);
+    hi = Math.ceil((hi + raw*0.03)/step)*step; lo = Math.floor((lo - raw*0.03)/step)*step;
+    var span = (hi-lo) || 1;
+    function y(v){ return padT + (hi - v)/span*ih; }
+    var zeroY = y(0), firstNeg = firstNegative(det), parts = [];
+    for(var gi = 0, gv = lo; gv <= hi + step*0.5 && gi < 40; gi++, gv = lo + gi*step){
+      var gy = y(gv);
+      parts.push('<line x1="'+padL+'" y1="'+gy.toFixed(1)+'" x2="'+(W-padR)+'" y2="'+gy.toFixed(1)+'" stroke="var(--grid)" stroke-width="1"></line>');
+      parts.push('<text class="axis-label" x="'+(padL-12)+'" y="'+(gy+3.5).toFixed(1)+'" text-anchor="end">'+esc(money(gv))+'</text>');
+    }
+    parts.push('<line x1="'+padL+'" y1="'+zeroY.toFixed(1)+'" x2="'+(W-padR)+'" y2="'+zeroY.toFixed(1)+'" stroke="var(--axis)" stroke-width="1.5"></line>');
+    var slot = iw/12, bw = Math.min(24, slot*0.5);
+    vals.forEach(function(v,i){
+      var cx = padL + slot*i + slot/2, yv = y(v), up = v >= 0, top = Math.min(yv, zeroY), bot = Math.max(yv, zeroY);
+      if(bot - top < 1.5){ if(up) top = bot - 1.5; else bot = top + 1.5; }
+      parts.push('<path class="cbar" data-bar="'+i+'" d="'+barPath(cx-bw/2, bw, top, bot, up)+'" fill="'+(up?"var(--pos)":"var(--neg)")+'"></path>');
+      parts.push('<text class="month-label" x="'+cx.toFixed(1)+'" y="'+(H-padB+24)+'" text-anchor="middle">'+esc(mLabel(det[i].ym))+'</text>');
+    });
+    var marked = {};
+    [0, firstNeg, 11].forEach(function(i){
+      if(i < 0 || marked[i]) return; marked[i] = 1;
+      var v = vals[i], cx = padL + slot*i + slot/2, ly = v >= 0 ? (y(v) - 10) : (y(v) + 15);
+      parts.push('<text class="bar-value" x="'+cx.toFixed(1)+'" y="'+ly.toFixed(1)+'" text-anchor="middle">'+esc(money(v))+'</text>');
+    });
+    if(firstNeg >= 0){
+      var fx = padL + slot*firstNeg + slot/2;
+      parts.push('<text class="dry-flag" x="'+fx.toFixed(1)+'" y="'+(y(vals[firstNeg])+30).toFixed(1)+'" text-anchor="middle">empty here</text>');
+    }
+    vals.forEach(function(v,i){
+      parts.push('<rect class="chit" data-hit="'+i+'" tabindex="0" role="img" x="'+(padL + slot*i).toFixed(1)+'" y="'+padT+'" width="'+slot.toFixed(1)+'" height="'+ih+'" aria-label="'+esc(mLong(det[i].ym))+', closing cash '+esc(money(v))+'"></rect>');
+    });
+    svg.innerHTML = parts.join("");
+    function barTip(i, x, yy){
+      var d = det[i], rows = [{color:"var(--s1)", square:true, name:"Revenue in", value:money(d.rev)},{color:"var(--s6)", square:true, name:"Costs out", value:money(-d.opex)}];
+      if(d.draw) rows.push({color:"var(--s6)", square:true, name:"To you", value:money(-d.draw)});
+      rows.push({color: d.close < 0 ? "var(--neg)" : "var(--pos)", square:true, name:"Closing cash", value:money(d.close)});
+      showTip(mLong(d.ym), rows, d.close < 0 ? "The account is overdrawn in this month." : "", x, yy);
+      svg.classList.add("hot");
+      Array.prototype.forEach.call(svg.querySelectorAll(".cbar"), function(el){ el.classList.toggle("on", el.getAttribute("data-bar") === String(i)); });
+    }
+    function barOff(){ svg.classList.remove("hot"); Array.prototype.forEach.call(svg.querySelectorAll(".cbar"), function(el){ el.classList.remove("on"); }); hideTip(); }
+    Array.prototype.forEach.call(svg.querySelectorAll(".chit"), function(hit){
+      var i = Number(hit.getAttribute("data-hit"));
+      hit.addEventListener("pointermove", function(e){ barTip(i, e.clientX, e.clientY); });
+      hit.addEventListener("pointerleave", barOff);
+      hit.addEventListener("focus", function(){ var c = centreOf(hit); barTip(i, c[0], c[1]); });
+      hit.addEventListener("blur", barOff);
+    });
+    $("cashTbody").innerHTML = det.map(function(d){
+      return '<tr><td>'+esc(mLong(d.ym))+'</td><td class="num right">'+esc(money(d.rev))+'</td><td class="num right">'+esc(money(-d.opex))+'</td>'+
+        '<td class="num right">'+(d.draw?esc(money(-d.draw)):"&ndash;")+'</td><td class="num right" style="font-weight:600'+(d.close<0?';color:var(--alarm)':'')+'">'+esc(money(d.close))+'</td></tr>';
+    }).join("");
+    $("cashVerdict").innerHTML = firstNeg < 0 ? '<span style="color:var(--ok);font-weight:600">The cash holds all 12 months.</span>'
+      : '<span style="color:var(--alarm);font-weight:600">The cash runs out in '+esc(mLong(det[firstNeg].ym))+'.</span>';
+    var due0 = unpaidByMonth()[NOW_YM] || [], bits = [];
+    bits.push("The chart starts from the " + money(CASH0()) + " in the bank. Unpaid bills are charged in the month they fall due, overdue ones in " + mLong(NOW_YM) + ".");
+    if(due0.length) bits.push(money(due0.reduce(function(a,x){ return a+x.base; },0)) + " of bills hit " + mLong(NOW_YM) + ".");
+    if(CFG().reclaim && reclaim() > 0) bits.push("Reclaimed VAT is not added back as cash, so the chart is on the careful side.");
+    var miss = missingRates(); if(miss.length) bits.push("No exchange rate for " + miss.join(", ") + ", so those amounts are counted one to one. Add the rate in Settings.");
+    $("month0Note").textContent = bits.join(" ");
+    paintRamp();
+  }
+
+  /* ================= what if ================= */
+  function kindLabel(w){
+    var st = ymOf(w.start) || NOW_YM, past = st < NOW_YM;
+    if(w.kind==="month") return "every month from " + mLong(st);
+    if(w.kind==="year") return "once a year from " + mLong(st);
+    return "one time in " + mLong(st) + (past ? " (already passed, not counted)" : "");
+  }
+  function paintWhatif(){
+    $("wiList").innerHTML = PLAN.whatif.map(function(w){
+      return '<div class="wirow"><span class="wn">'+esc(w.name || "Unnamed purchase")+'</span>'+
+        '<span class="wm">'+esc(kindLabel(w))+(w.vat?" &middot; VAT on top":"")+'</span>'+
+        '<span class="wv">'+esc(money(wiCost(w)))+(String(w.cur)!==BASE()?' <span class="wm">('+esc(nb(w.amt,2))+' '+esc(w.cur)+')</span>':'')+'</span>'+
+        '<button type="button" class="wix" data-wix="'+esc(w.id)+'" title="Remove">&times;</button></div>';
+    }).join("");
+    var box = $("wiVerdict");
+    if(!PLAN.whatif.length){ box.hidden = true; return; }
+    box.hidden = false;
+    var withD = projectDetail(12), baseD = projectDetail(12, {noWhatif:true});
+    var n1 = firstNegative(withD), n0 = firstNegative(baseD);
+    var saved = PLAN.whatif; PLAN.whatif = []; var baseL3 = lvl3(), baseRR = runRate(), baseRun = runwayMonths(); PLAN.whatif = saved;
+    var newRun = runwayMonths();
+    function cell(label, value, sub, cls){ return '<div class="wc"><span class="wcl">'+esc(label)+'</span><span class="wcv'+(cls?" "+cls:"")+'">'+esc(value)+'</span><span class="wcs">'+esc(sub)+'</span></div>'; }
+    var lumps = PLAN.whatif.filter(function(w){ return w.kind==="once"; }).reduce(function(a,w){ return a + (ymOf(w.start) >= NOW_YM ? wiCost(w) : 0); },0);
+    var lost = (isFinite(baseRun) && isFinite(newRun)) ? baseRun - newRun : null;
+    box.innerHTML =
+      cell("Extra per month", money(whatifRun()), whatifRun() ? "On top of " + money(baseRR) : "Nothing recurring") +
+      (lumps ? cell("One time out", money(lumps), "Straight off the balance in that month") : "") +
+      cell("New break even", money(lvl3()), "Was " + money(baseL3)) +
+      cell("Cash empty", n1 < 0 ? "holds 12 months" : mLong(withD[n1].ym), n0 === n1 ? "Same as without it" : (n0 < 0 ? "Without it the cash held 12 months" : "Without it: " + mLong(baseD[n0].ym)), (n1 >= 0 && n0 !== n1) ? "bad" : (n1 < 0 ? "ok" : "")) +
+      (lost && lost > 0.05 ? cell("Runway cost", nb(lost,1) + " months", "Less runway if you win no new work", "bad") : "");
+  }
+  $("wiAdd").addEventListener("click", function(){
+    var amt = Math.max(0, num($("wiAmt").value));
+    if(!amt){ $("wiAmt").focus(); return; }
+    PLAN.whatif = PLAN.whatif.concat([{ id:"w"+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36), name:$("wiName").value.trim().slice(0,80),
+      amt:amt, cur:$("wiCur").value, kind:$("wiKind").value, vat:$("wiVat").value==="1", start:$("wiStart").value }]);
+    $("wiName").value = ""; $("wiAmt").value = "0";
+    refreshNumbers(); queueSave();
+  });
+  $("wiList").addEventListener("click", function(e){
+    var b = e.target.closest("[data-wix]"); if(!b) return;
+    var id = b.getAttribute("data-wix");
+    PLAN.whatif = PLAN.whatif.filter(function(w){ return w.id !== id; });
+    refreshNumbers(); queueSave();
+  });
+
+  /* ================= saving the plan ================= */
+  var PLAN_READY = false, saveTimer = null, LAST_SAVED_AT = null, REAL_PLAN = null;
+  function sanitisePlan(o){
+    o = o || {};
+    var p = JSON.parse(JSON.stringify(DEFAULT_PLAN));
+    p.bank = num(o.bank); p.drawNet = Math.max(0,num(o.drawNet)); p.rev = Math.max(0,num(o.rev)); p.step = Math.max(0,num(o.step));
+    p.revStart = ymOf(o.revStart) || p.revStart;
+    p.drawStart = o.drawStart === "never" ? "never" : (ymOf(o.drawStart) || "never");
+    if(o.overrides && typeof o.overrides === "object") Object.keys(o.overrides).forEach(function(k){ if(ymOf(k) === k && isFinite(Number(o.overrides[k]))) p.overrides[k] = Math.max(0, Number(o.overrides[k])); });
+    if(Array.isArray(o.whatif)) p.whatif = o.whatif.slice(0,50).filter(function(w){ return w && typeof w === "object"; }).map(function(w){
+      return {id:String(w.id||Math.random()), name:String(w.name||"").slice(0,80), amt:Math.max(0,num(w.amt)), cur:String(w.cur||BASE()).toUpperCase().slice(0,3),
+              kind:(["month","year","once"].indexOf(w.kind)>=0?w.kind:"once"), vat:w.vat===true, start:ymOf(w.start)||NOW_YM};
+    });
+    p.savedAt = o.savedAt || null;
+    return p;
+  }
+  function flashSaved(){ var t = $("saveTag"); t.textContent = "Saved"; t.classList.add("on"); clearTimeout(t.__f); t.__f = setTimeout(function(){ t.textContent = "Saved automatically"; t.classList.remove("on"); }, 1400); }
+  var USER_EDITED = false, PLAN_SEEN = false;
+  function queueSave(){
+    if(!DEMO) USER_EDITED = true;
+    if(DEMO){ $("saveTag").textContent = "Example, not saved"; return; }
+    if(!PLAN_READY || !dbRef) return;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function(){
+      var payload = JSON.parse(JSON.stringify(PLAN)); payload.savedAt = new Date().toISOString();
+      LAST_SAVED_AT = payload.savedAt; REAL_PLAN = payload;
+      dbRef.doc("settings/plan").set(payload).then(flashSaved).catch(function(){ var t = $("saveTag"); t.textContent = "Not saved"; });
+    }, 700);
+  }
+  var PLAN_INPUT_IDS = ["bankInput","drawNet","revSlider","revVal","revStep","revStart","drawStart","wiAdd","rampReset"];
+  function lockPlan(on){
+    PLAN_INPUT_IDS.forEach(function(id){ var el = $(id); if(el) el.disabled = on; });
+    Array.prototype.forEach.call(document.querySelectorAll(".rampin"), function(el){ el.disabled = on; });
+  }
+  function applyPlan(o){
+    if(o && o.savedAt && o.savedAt === LAST_SAVED_AT){ PLAN_READY = true; return; }
+    REAL_PLAN = o || null;
+    if(DEMO) return;
+    if(!PLAN_SEEN && PLAN_READY && USER_EDITED){
+      /* the page unlocked after waiting and the user has typed since: keep their numbers and save them */
+      PLAN_SEEN = true; lockPlan(false); queueSave(); return;
+    }
+    PLAN_SEEN = true;
+    var typing = document.activeElement && document.activeElement.classList && document.activeElement.classList.contains("rampin");
+    var keepOverrides = PLAN.overrides;
+    PLAN = sanitisePlan(o);
+    if(typing) PLAN.overrides = keepOverrides;
+    PLAN_READY = true; lockPlan(false);
+    planToInputs(); refreshNumbers();
+  }
+
+  /* ================= settings ================= */
+  function parseFx(s){
+    var out = {};
+    String(s||"").split(/[,;\n]/).forEach(function(part){
+      var m = /^\s*([A-Za-z]{3})\s*[=:]\s*([0-9]+(?:[.,][0-9]+)?)\s*$/.exec(part);
+      if(m) out[m[1].toUpperCase()] = Number(m[2].replace(",", "."));
+    });
+    return out;
+  }
+  function fxText(fx){ return Object.keys(fx||{}).map(function(k){ return k + "=" + fx[k]; }).join(", "); }
+  function settingsToInputs(){
+    var c = CFG(), act = document.activeElement;
+    function set(id, v){ var el = $(id); if(el && el !== act) el.value = String(v); }
+    set("stName", c.name); set("stCur", BASE()); set("stLocale", c.locale); set("stVat", num(c.vat));
+    set("stTax", num(c.tax)); set("stFounders", Math.max(1, Math.round(num(c.founders,1)))); set("stDeal", num(c.deal)); set("stStart", c.start); set("stFx", fxText(c.fx));
+    set("stReclaim", c.reclaim ? "1" : "0");
+    var nm = String(c.name||"").trim();
+    $("mastEyebrow").textContent = (nm ? nm + " / " : "") + "cost base and cash";
+    document.title = nm ? nm + " runway" : "Business Runway artifact from Brinvik";
+    $("mastNote").textContent = "Every cost with a receipt behind it, what it costs per month, and what has to come in before the account is empty. The forecast runs " + mLong(MONTHS[0]) + " to " + mLong(MONTHS[11]) + " and rolls forward on its own.";
+    var miss = missingRates();
+    $("fxNote").textContent = miss.length ? "Missing a rate for " + miss.join(", ") + ". Write it as " + miss[0] + "=0.00, meaning one " + miss[0] + " is worth that many " + BASE() + "." : "";
+  }
+  (function(){
+    var wrap = document.createElement("div"); wrap.className = "ctl";
+    wrap.innerHTML = '<label for="stReclaim">You reclaim VAT on costs</label><select id="stReclaim"><option value="1">Yes</option><option value="0">No</option></select>';
+    $("stVat").closest(".ctl").after(wrap);
+  })();
+  var cfgTimer = null;
+  function onSettings(){
+    var cur = $("stCur").value.trim().toUpperCase();
+    var patch = {
+      name: $("stName").value.trim().slice(0,80),
+      currency: /^[A-Z]{3}$/.test(cur) ? cur : BASE(),
+      locale: $("stLocale").value,
+      vat: clamp(num($("stVat").value),0,50), reclaim: $("stReclaim").value === "1",
+      tax: clamp(num($("stTax").value),0,80), founders: clamp(Math.round(num($("stFounders").value,1)),1,10), deal: Math.max(0,num($("stDeal").value)),
+      start: /^\d{4}-\d{2}-\d{2}$/.test($("stStart").value.trim()) ? $("stStart").value.trim() : "",
+      fx: parseFx($("stFx").value)
+    };
+    clearTimeout(cfgTimer);
+    cfgTimer = setTimeout(function(){
+      if(DEMO){ DEMODATA.config = Object.assign({}, DEMODATA.config, patch); refreshAll(); return; }
+      REAL.config = Object.assign({}, REAL.config||{}, patch); refreshAll();
+      if(dbRef) dbRef.doc("settings/config").set(REAL.config).catch(function(){});
+    }, 600);
+  }
+  ["stName","stCur","stVat","stTax","stFounders","stDeal","stStart","stFx"].forEach(function(id){ $(id).addEventListener("input", onSettings); });
+  ["stLocale","stReclaim"].forEach(function(id){ $(id).addEventListener("change", onSettings); });
+
+  /* ================= files, lightbox, downloads ================= */
+  var lb = $("lightbox"), lbImg = $("lightboxImg"), lbClose = $("lightboxClose"), lbReturn = null;
+  function openLb(){
+    if(lb.classList.contains("on")) return;
+    lbReturn = document.activeElement;
+    lb.hidden = false; lb.classList.add("on");
+    lbClose.focus();
+  }
+  function closeLb(){
+    if(!lb.classList.contains("on")) return;
+    lb.classList.remove("on"); lb.hidden = true; lbImg.removeAttribute("src");
+    if(lbReturn && lbReturn.focus && document.contains(lbReturn)) lbReturn.focus();
+    lbReturn = null;
+  }
+  lb.addEventListener("click", closeLb);
+  document.addEventListener("keydown", function(e){
+    if(lb.classList.contains("on")){
+      if(e.key === "Escape"){ e.preventDefault(); closeLb(); }
+      else if(e.key === "Tab"){ e.preventDefault(); lbClose.focus(); }   /* only one control in the dialog, keep focus on it */
+      return;
+    }
+    /* receipt pictures open with Enter or Space, same as a click */
+    var z = e.target && e.target.closest && e.target.closest("img[data-zoom]");
+    if(z && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); z.click(); }
+  });
+  function b64clean(s){ return String(s||"").replace(/[^A-Za-z0-9+\/=]/g,""); }
+  function getFile(id){
+    if(FILES[id]) return Promise.resolve(FILES[id]);
+    if(DEMO || !dbRef) return Promise.resolve(null);
+    return dbRef.doc("files/"+id).get().then(function(doc){
+      var f = doc && doc.exists ? (doc.data() || null) : null;
+      if(f && typeof f.fileData === "string") FILES[id] = f;
+      return FILES[id] || null;
+    }).catch(function(){ return null; });
+  }
+  function zoom(id){
+    var d = D().receipts[id] || {}, t = safeImg(d.thumb);
+    if(!t && d.hasFile !== true) return;
+    if(t){ lbImg.src = t; openLb(); }
+    getFile(id).then(function(f){
+      if(!f) return;
+      if(/^image\/(png|jpe?g|webp|gif)$/i.test(safeMime(f.fileMime))){ lbImg.src = "data:"+safeMime(f.fileMime)+";base64,"+b64clean(f.fileData); openLb(); }
+      else if(!t) saveOne(id).catch(function(){});
+    });
+  }
+  function b64ToBlob(b64, mime){
+    var bin = atob(b64clean(b64)), buf = new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++) buf[i] = bin.charCodeAt(i);
+    return new Blob([buf], {type: safeMime(mime)});
+  }
+  function safeName(n, id){
+    return String(n || (id + ".bin")).split("").filter(function(ch){ return ch.charCodeAt(0) >= 32; }).join("").replace(/[\\\/:*?"<>|]/g, "_").slice(0,120);
+  }
+  function saveOne(id){
+    if(!dl) return Promise.resolve();
+    return getFile(id).then(function(f){ if(!f || !f.fileData) return null; return dl.save({filename: safeName(f.fileName, id), data: b64ToBlob(f.fileData, f.fileMime)}); });
+  }
+  async function saveMany(ids){ for(var i=0;i<ids.length;i++){ try { await saveOne(ids[i]); } catch(e){ if(e && (e.code === "declined" || e.code === "rate_limited")) return; } } }
+  function syncDlButtons(){
+    var R = D().receipts, any = Object.keys(R).some(function(k){ return R[k] && R[k].hasFile === true; });
+    $("dlAll").hidden = !(dl && any && !DEMO); $("dlBiz").hidden = !(dl && any && !DEMO);
+  }
+  document.addEventListener("click", function(e){
+    var b = e.target.closest("[data-dl]"); if(!b) return;
+    b.disabled = true; saveOne(b.getAttribute("data-dl")).catch(function(){}).then(function(){ b.disabled = false; });
+  });
+  $("dlAll").addEventListener("click", function(){ var R = D().receipts; saveMany(Object.keys(R).filter(function(k){ return R[k] && R[k].hasFile === true; }).sort()); });
+  $("dlBiz").addEventListener("click", function(){ var R = D().receipts; saveMany(Object.keys(R).filter(function(k){ return R[k] && R[k].hasFile === true && R[k].status === "business"; }).sort()); });
+
+  /* ================= jump to a receipt or question ================= */
+  function flash(el){ el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
+  function jumpTo(id){
+    if(id.indexOf("q:") === 0){
+      var qc = document.querySelector('[data-q="'+CSS.escape(id.slice(2))+'"]') || $("openQuestions");
+      qc.scrollIntoView({behavior:"smooth", block:"center"}); flash(qc); return;
+    }
+    var t = document.querySelector('[data-card="'+CSS.escape(id)+'"]');
+    if(t && t.closest("details")) t.closest("details").open = true;
+    t = t || $("triagePanel");
+    t.scrollIntoView({behavior:"smooth", block:"center"});
+    if(t.classList.contains("rcard")) flash(t);
+  }
+  document.addEventListener("click", function(e){ var b = e.target.closest("[data-jump]"); if(b){ e.preventDefault(); jumpTo(b.getAttribute("data-jump")); } });
+
+  /* ================= receipt triage ================= */
+  var LOAD_NOTE = "";   /* why the page has no saved data, shown where the receipts would be */
+  function card(id, d){
+    var img = safeImg(d.thumb);
+    var shot = img ? '<img class="rshot" alt="Receipt from '+esc(d.vendor)+'" src="'+esc(img)+'" data-zoom="'+esc(id)+'" tabindex="0" role="button" aria-label="Open the receipt from '+esc(d.vendor)+' full size">'
+      : '<div class="rnoshot">'+(d.source === "photo" ? "PHOTO RECEIPT" : "CAME IN BY EMAIL")+'<br>'+esc(d.fileName || (d.source === "photo" ? "picture not attached yet" : "no file, the email is the receipt"))+'</div>';
+    var detail = (Array.isArray(d.detail) && d.detail.length) ? '<dl class="rdetail">'+d.detail.map(function(r){ return '<dt>'+esc(r&&r[0])+'</dt><dd>'+esc(r&&r[1])+'</dd>'; }).join("")+'</dl>' : "";
+    var file = d.hasFile === true ? '<div class="rdl"><button type="button" class="dlbtn" data-dl="'+esc(id)+'"><span class="ext">'+esc(String(d.fileName||"").split(".").pop().toLowerCase()||"file")+'</span>'+esc(d.fileName||"Download")+'</button></div>' : '<span class="rnofile">No file for this one.</span>';
+    var decided = d.status === "business" || d.status === "private";
+    var foot = decided
+      ? '<div class="rverdict"><span class="vlabel '+(d.status==="business"?"business":"private")+'">'+(d.status==="business"?"BUSINESS":"PRIVATE")+'</span><button type="button" class="rundo" data-id="'+esc(id)+'" data-set="open">Change</button></div>'
+      : '<div class="ract"><button type="button" class="rbtn yes" data-id="'+esc(id)+'" data-set="business">Business</button><button type="button" class="rbtn no" data-id="'+esc(id)+'" data-set="private">Private</button></div>';
+    var el = document.createElement("div");
+    el.setAttribute("data-card", id);
+    el.className = "rcard" + (decided ? " decided" : "");
+    el.innerHTML = shot + '<div class="rbody"><div class="rtop"><span class="rvendor">'+esc(d.vendor)+'</span><span class="ramt">'+esc(money(d.amountBase))+'</span></div>'+
+      '<div class="rmeta">'+esc(d.date)+' &middot; VAT '+esc(money(d.vatBase))+' &middot; '+esc(d.category)+'</div>'+
+      '<div class="rdesc">'+esc(d.description)+'</div>'+(d.hint?'<div class="rhint">'+esc(d.hint)+'</div>':'')+detail+file+foot+'</div>';
+    return el;
+  }
+  /* a receipt is in triage if Claude flagged it, or it has no decision yet */
+  function paintTriage(){
+    var R = D().receipts;
+    var docs = Object.keys(R).map(function(id){ return {id:id, d:R[id]||{}}; })
+      .filter(function(x){ return x.d.inRegister !== false && (x.d.needsDecision === true || (x.d.status !== "business" && x.d.status !== "private")); });
+    var openEl = $("triageOpen"), doneEl = $("triageDone");
+    openEl.innerHTML = ""; doneEl.innerHTML = "";
+    var nOpen = 0, nDone = 0, sumB = 0, sumP = 0, vatB = 0;
+    docs.sort(function(a,b){ return String(a.d.date).localeCompare(String(b.d.date)); }).forEach(function(x){
+      var st = x.d.status;
+      if(st === "business" || st === "private"){
+        doneEl.appendChild(card(x.id, x.d)); nDone++;
+        if(st === "business"){ sumB += num(x.d.amountBase); vatB += num(x.d.vatBase); } else sumP += num(x.d.amountBase);
+      } else { openEl.appendChild(card(x.id, x.d)); nOpen++; }
+    });
+    var stEl = $("triageState");
+    if(REAL.loaded || DEMO) stEl.textContent = nOpen ? "" : (nDone ? "All decided. Nothing waiting." : ((!DEMO && LOAD_NOTE) || "Nothing waiting for a decision."));
+    stEl.style.display = nOpen ? "none" : "block";
+    $("triageDoneWrap").hidden = nDone === 0; $("triageTally").hidden = nDone === 0;
+    if(nDone) $("triageTally").innerHTML = '<div><span class="tl">Waiting</span><span class="tv">'+nOpen+'</span></div>'+
+      '<div><span class="tl">To the business</span><span class="tv" style="color:var(--ok)">'+esc(money(sumB))+'</span></div>'+
+      '<div><span class="tl">VAT on those</span><span class="tv">'+esc(money(vatB))+'</span></div>'+
+      '<div><span class="tl">Private</span><span class="tv" style="color:var(--alarm)">'+esc(money(sumP))+'</span></div>';
+  }
+  function onDecide(e){
+    var z = e.target.closest("[data-zoom]"); if(z){ zoom(z.getAttribute("data-zoom")); return; }
+    var b = e.target.closest("[data-set]"); if(!b) return;
+    var id = b.getAttribute("data-id"), next = b.getAttribute("data-set");
+    if(busy[id] || (!DEMO && !dbRef) || ["business","private","open"].indexOf(next) < 0) return;
+    busy[id] = true; b.disabled = true;
+    write("receipts/"+id, {status: next, needsDecision: true, decidedAt: new Date().toISOString()})
+      .catch(function(){ b.disabled = false; }).then(function(){ delete busy[id]; });
+  }
+  $("triageOpen").addEventListener("click", onDecide);
+  $("triageDone").addEventListener("click", onDecide);
+
+  /* ================= double-check panel ================= */
+  function paintQa(){
+    var R = D().receipts, open = [], done = [], checked = 0;
+    Object.keys(R).forEach(function(id){
+      var d = R[id]; if(!d || !d.qaVerdict) return; checked++;
+      var clean = d.qaVerdict === "pass" && d.qaArithmeticOk === true && !(Array.isArray(d.qaConflicts) && d.qaConflicts.length);
+      if(clean) return;
+      (d.qaAccepted ? done : open).push({id:id, d:d});
+    });
+    $("qaPanel").hidden = !checked;
+    if(!checked) return;
+    $("qaTally").textContent = open.length ? open.length + " still open of " + checked + " checked" : "all " + checked + " settled";
+    $("qaList").innerHTML = open.sort(function(a,b){ return String(a.d.date).localeCompare(String(b.d.date)); }).map(function(r){
+      var d = r.d, picks = (d.qaPicks && typeof d.qaPicks === "object") ? d.qaPicks : {};
+      var conf = (Array.isArray(d.qaConflicts) ? d.qaConflicts : []).map(function(c){
+        c = c || {};
+        var vals = []; (Array.isArray(c.readings) ? c.readings : [c.a, c.b, c.c]).forEach(function(v){ var k = (v===null||v===undefined) ? "" : String(v); if(vals.indexOf(k) < 0) vals.push(k); });
+        var chosen = picks[c.field];
+        return '<div class="qaconf"><span class="qcf">'+esc(c.field)+'</span>'+vals.map(function(v){
+          var on = chosen !== undefined && String(chosen === null ? "" : chosen) === v;
+          return '<button type="button" class="qapick'+(on?" on":"")+'" data-qapick="'+esc(r.id)+'" data-field="'+esc(c.field)+'" data-val="'+esc(v)+'">'+esc(v === "" ? "leave blank" : v)+'</button>';
+        }).join("")+'<div class="qcw">'+esc(c.why)+'</div></div>';
+      }).join("");
+      var seeBtn = (d.hasFile === true || safeImg(d.thumb)) ? '<button type="button" class="qabtn" data-zoom="'+esc(r.id)+'">See the receipt</button>' : '';
+      return '<div class="qarow"><span class="qabadge '+(d.qaVerdict==="pass"?"pass":"review")+'">'+esc(d.qaVerdict)+'</span>'+
+        '<span class="qn"><strong>'+esc(d.vendor)+'</strong> &middot; '+esc(d.date)+' &middot; '+esc(money(d.amountBase))+conf+'</span>'+
+        '<span class="qs">'+esc(d.qaSummary)+'<div class="qaact">'+seeBtn+
+        '<button type="button" class="qabtn go" data-qaok="'+esc(r.id)+'">I have checked it, close this</button></div></span></div>';
+    }).join("") || '<div class="qarow"><span class="qs">Nothing left to look at.</span></div>';
+    $("qaDoneWrap").hidden = done.length === 0;
+    $("qaDoneCount").textContent = done.length;
+    $("qaDone").innerHTML = done.map(function(r){
+      return '<div class="qarow"><span class="qabadge pass">SIGNED OFF</span><span class="qn"><strong>'+esc(r.d.vendor)+'</strong> &middot; '+esc(r.d.date)+' &middot; '+esc(money(r.d.amountBase))+'</span>'+
+        '<span class="qs">'+esc(r.d.qaSummary)+'<div class="qaact"><button type="button" class="qabtn" data-qaundo="'+esc(r.id)+'">Reopen</button></div></span></div>';
+    }).join("");
+  }
+  $("qaPanel").addEventListener("click", function(e){
+    var b;
+    if((b = e.target.closest("[data-zoom]"))){ zoom(b.getAttribute("data-zoom")); return; }
+    if((b = e.target.closest("[data-qapick]"))){
+      var id = b.getAttribute("data-qapick"), field = b.getAttribute("data-field"), v = b.getAttribute("data-val");
+      var cur = (D().receipts[id] || {}).qaPicks || {}, next = {}; Object.keys(cur).forEach(function(k){ next[k] = cur[k]; });
+      next[field] = v === "" ? null : v;
+      write("receipts/"+id, {qaPicks: next, qaPickedAt: new Date().toISOString()}).catch(function(){});
+      return;
+    }
+    if((b = e.target.closest("[data-qaok]"))){ write("receipts/"+b.getAttribute("data-qaok"), {qaAccepted:true, qaAcceptedAt:new Date().toISOString()}).catch(function(){}); return; }
+    if((b = e.target.closest("[data-qaundo]"))){ write("receipts/"+b.getAttribute("data-qaundo"), {qaAccepted:false, qaAcceptedAt:null}).catch(function(){}); return; }
+  });
+
+  /* ================= questions ================= */
+  function paintQuestions(){
+    var Q = D().questions, ids = Object.keys(Q);
+    var openEl = $("qOpen"), doneEl = $("qDone"); openEl.innerHTML = ""; doneEl.innerHTML = "";
+    var nOpen = 0, nDone = 0;
+    ids.sort(function(a,b){ return num(Q[a].order) - num(Q[b].order); }).forEach(function(id){
+      var q = Q[id] || {}, done = false, body = '<div class="qhead"><span class="qtext">'+esc(q.question)+'</span><span class="qnum">'+esc(q.order)+'</span></div>'+(q.detail?'<div class="qdetail">'+esc(q.detail)+'</div>':'');
+      if(q.kind === "receipt"){
+        var linked = Array.isArray(q.linked) ? q.linked.map(String) : [];
+        var undecided = linked.filter(function(r){ var s = (D().receipts[r]||{}).status; return s !== "business" && s !== "private"; });
+        done = linked.length > 0 && undecided.length === 0;
+        body += '<div class="qopts">'+(done ? '<span class="tag ok">Decided</span>' : '<button type="button" class="qopt" data-jump="'+esc(undecided[0]||"")+'">Go to the receipts &rarr;</button><span class="qeffect" style="color:var(--ink-3)">'+undecided.length+' of '+linked.length+' still undecided</span>')+'</div>';
+      } else {
+        var opts = Array.isArray(q.options) ? q.options : [];
+        done = !!q.answer;
+        body += '<div class="qopts">'+opts.map(function(o){
+          o = Array.isArray(o) ? o : [o, o];
+          return '<button type="button" class="qopt" data-qid="'+esc(id)+'" data-val="'+esc(o[0])+'" aria-pressed="'+(q.answer===String(o[0]))+'">'+esc(o[1])+'</button>';
+        }).join("")+'</div>';
+      }
+      var el = document.createElement("div"); el.setAttribute("data-q", id); el.className = "qcard" + (done ? " answered" : ""); el.innerHTML = body;
+      if(done){ doneEl.appendChild(el); nDone++; } else { openEl.appendChild(el); nOpen++; }
+    });
+    $("qDoneWrap").hidden = nDone === 0;
+    $("qState").textContent = ids.length ? (nOpen ? "" : "Every question is answered.") : "No questions yet.";
+    $("qState").style.display = nOpen ? "none" : "block";
+    document.querySelector("#openQuestions h2").textContent = nOpen ? "Before these numbers are final: " + nOpen + " left" : "Before these numbers are final";
+  }
+  function onQ(e){
+    var b = e.target.closest("[data-qid]"); if(!b) return;
+    var qid = b.getAttribute("data-qid"), val = b.getAttribute("data-val");
+    if(busy["q:"+qid] || (!DEMO && !dbRef)) return;
+    busy["q:"+qid] = true;
+    write("questions/"+qid, {answer: val, answeredAt: new Date().toISOString()}).catch(function(){}).then(function(){ delete busy["q:"+qid]; });
+  }
+  $("qOpen").addEventListener("click", onQ); $("qDone").addEventListener("click", onQ);
+
+  /* ================= example data: in memory only, clearly fictional ================= */
+  function makeDemo(){
+    var m0 = NOW_YM, mP = ymAdd(NOW_YM,-1), d = function(ym, day){ return ym + "-" + pad2(day); };
+    return {
+      loaded:true,
+      config:{name:"Example Studio", currency:"EUR", locale:"en-GB", vat:25, reclaim:true, tax:35, deal:4000, start:d(ymAdd(NOW_YM,-3),1), fx:{USD:0.92}},
+      subs:{
+        s1:{name:"Coworking desk", what:"Flex desk", amount:250, currency:"EUR", cadence:"month", vat:true, active:true},
+        s2:{name:"AI assistant", what:"Pro plan", amount:20, currency:"USD", cadence:"month", vat:false, active:true},
+        s3:{name:"Accounting app", what:"Yearly plan", amount:300, currency:"EUR", cadence:"year", vat:true, nextCharge:ymAdd(NOW_YM,2), active:true},
+        s4:{name:"Website hosting", what:"Starter", amount:12, currency:"USD", cadence:"month", vat:false, active:true},
+        s6:{name:"Ads", what:"Monthly ad budget", amount:150, currency:"EUR", cadence:"month", vat:false, active:true, kind:"ads"},
+        s5:{name:"Phone", what:"Mobile plan", amount:30, currency:"EUR", cadence:"month", vat:true, active:true, questionId:"q1", dropOn:"private"}
+      },
+      receipts:{
+        r1:{date:d(mP,3), vendor:"Coworking desk", description:"Flex desk", currency:"EUR", amountOrig:312.5, amountBase:312.5, vatBase:62.5, category:"Rent", status:"business", paid:true, hasFile:false, voucherNeeded:false},
+        r2:{date:d(mP,9), vendor:"AI assistant", description:"Pro plan", currency:"USD", amountOrig:20, amountBase:18.4, vatBase:0, category:"Software", status:"business", paid:true, voucherNeeded:false},
+        r3:{date:d(m0,2), vendor:"Print shop", description:"Business cards", currency:"EUR", amountOrig:60, amountBase:60, vatBase:12, category:"Marketing", status:"open", needsDecision:true, paid:true, source:"photo", hint:"Paper receipt. Business cards are normally a business cost."},
+        r4:{date:d(m0,4), vendor:"Cafe Nord", description:"Lunch for one", currency:"EUR", amountOrig:14, amountBase:14, vatBase:2.8, category:"Food and drink", status:"open", needsDecision:true, paid:true, source:"photo", hint:"Your own lunch is usually private. Ask your accountant."},
+        r5:{date:d(mP,20), vendor:"Freelance designer", description:"Logo, invoice 1042", currency:"EUR", amountOrig:750, amountBase:750, vatBase:150, category:"Design", status:"business", paid:false, dueDate:d(mP,28)},
+        r6:{date:d(m0,5), vendor:"Laptop store", description:"Laptop stand", currency:"EUR", amountOrig:45, amountBase:45, vatBase:9, category:"Equipment", status:"business", paid:true, addedAt:new Date(Date.now()-30*3600000).toISOString()}
+      },
+      owed:{
+        o1:{client:"Client A", description:"Workshop, invoice 12", amountBase:2500, expectedDate:d(ymAdd(NOW_YM,1),10), paid:false}
+      },
+      questions:{
+        q1:{order:1, question:"Is the phone plan a business cost?", detail:"It is on your personal number. If it is private it comes out of the run rate.", options:[["business","Business"],["private","Private"]]},
+        q2:{order:2, question:"Two paper receipts need a decision", kind:"receipt", linked:["r3","r4"]}
+      },
+      plan:{bank:6000, drawNet:1500, rev:0, step:0, revStart:ymAdd(NOW_YM,1), drawStart:ymAdd(NOW_YM,2), overrides:{}, whatif:[]}
+    };
+  }
+  function setDemo(on){
+    DEMO = on;
+    if(on){ DEMODATA = makeDemo(); PLAN = sanitisePlan(DEMODATA.plan); }
+    else { DEMODATA = null; PLAN = sanitisePlan(REAL_PLAN); }
+    $("demoBar").hidden = !on;
+    $("saveTag").textContent = on ? "Example, not saved" : "Saved automatically";
+    planToInputs(); refreshAll();
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+  $("demoOn").addEventListener("click", function(){ setDemo(true); });
+  $("demoOff").addEventListener("click", function(){ setDemo(false); });
+
+  /* ================= money owed to you ================= */
+  function paintOwed(){
+    var rows = owedRows();
+    $("owedPanel").hidden = rows.length === 0;
+    var counted = rows.filter(function(o){ return !o.doubtful; }).reduce(function(a,o){ return a+o.amount; },0);
+    var doubt = rows.filter(function(o){ return o.doubtful; }).reduce(function(a,o){ return a+o.amount; },0);
+    $("owedTotal").textContent = money(counted) + (doubt ? " counted, plus " + money(doubt) + " doubtful" : "");
+    $("owedList").innerHTML = rows.map(function(o){
+      return '<div class="duerow"><span><strong>'+esc(o.client||"Client")+'</strong> &middot; '+esc(o.desc)+'</span>'+
+        '<span style="display:flex;gap:14px;align-items:center"><span class="num">'+esc(money(o.amount))+'</span>'+
+        (o.expected ? '<span class="paidbtn '+(o.overdue?"due":"no")+'" style="cursor:default">'+(o.doubtful?"60+ DAYS LATE, NOT COUNTED ":(o.overdue?"OVERDUE ":"EXPECTED "))+esc(o.expected)+'</span>' : '')+
+        '<button type="button" class="paidbtn" data-owedpaid="'+esc(o.id)+'">Mark received</button></span></div>';
+    }).join("");
+  }
+  $("owedList").addEventListener("click", function(e){
+    var b = e.target.closest("[data-owedpaid]"); if(!b) return;
+    var id = b.getAttribute("data-owedpaid");
+    if(busy["o:"+id] || (!DEMO && !dbRef)) return;
+    busy["o:"+id] = true;
+    write("receivables/"+id, {paid:true, paidAt:new Date().toISOString()}).catch(function(){}).then(function(){ delete busy["o:"+id]; });
+  });
+
+  /* ================= painting ================= */
+  function refreshNumbers(){ paintBank(); paintBreakeven(); paintWhatif(); }
+  function refreshAll(){
+    var empty = !Object.keys(REAL.receipts).length && !Object.keys(REAL.subs).length && !Object.keys(REAL.owed).length && !REAL.config;
+    $("onboard").hidden = DEMO || !REAL.loaded || !empty;
+    fillMonthSelects(); settingsToInputs();
+    paintSubs(); paintOwed(); paintTriage(); paintQuestions(); render(); refreshNumbers(); syncDlButtons();
+  }
+
+  /* ================= boot ================= */
+  fillMonthSelects(); planToInputs(); refreshAll();
+  var bootTimer = setTimeout(function(){
+    if(!REAL.loaded){ REAL.loaded = true; LOAD_NOTE = "Your data is taking longer than usual to load. Reload the page if it stays empty."; refreshAll(); }
+  }, 12000);
+  if(!window.claude || !window.claude.use){
+    REAL.loaded = true; clearTimeout(bootTimer);
+    LOAD_NOTE = "Open this page on claude.ai to keep your data. The example still works here.";
+    refreshAll();
+    return;
+  }
+  window.claude.use("downloads").then(function(x){ dl = x; syncDlButtons(); }).catch(function(){});
+  window.claude.use("db").then(function(db){
+    if(!db){ REAL.loaded = true; LOAD_NOTE = "Saving is not available in this view."; refreshAll(); return; }
+    dbRef = db;
+    lockPlan(true);
+    setTimeout(function(){ if(!PLAN_READY){ PLAN_READY = true; lockPlan(false); } }, 8000);
+    var pending = {receipts:true, subscriptions:true, questions:true, receivables:true};
+    function loadedOne(k){ delete pending[k]; if(!Object.keys(pending).length){ REAL.loaded = true; clearTimeout(bootTimer); } }
+    function listen(col, key){
+      db.collection(col).onSnapshot(function(snap){
+        var map = {};
+        (snap.docs || []).forEach(function(doc){ if(doc.exists){ var v = doc.data(); if(v && typeof v === "object") map[doc.id] = v; } });
+        REAL[key] = map; loadedOne(col);
+        if(/longer than usual/.test(LOAD_NOTE)) LOAD_NOTE = "";
+        if(!DEMO) refreshAll(); else $("onboard").hidden = true;
+      }, function(err){ loadedOne(col); LOAD_NOTE = "Could not load " + col + " (" + String((err && err.code) || "unknown") + ")."; if(!DEMO) refreshAll(); });
+    }
+    listen("receipts", "receipts"); listen("subscriptions", "subs"); listen("questions", "questions"); listen("receivables", "owed");
+    db.doc("settings/config").onSnapshot(function(doc){
+      REAL.config = (doc && doc.exists && doc.data()) || null;
+      if(!DEMO) refreshAll();
+    }, function(){});
+    db.doc("settings/plan").onSnapshot(function(doc){
+      applyPlan((doc && doc.exists && doc.data()) || null);
+    }, function(){ PLAN_READY = true; lockPlan(false); });
+  }).catch(function(){ REAL.loaded = true; LOAD_NOTE = "Could not reach the data store."; refreshAll(); });
+})();
+</script>
