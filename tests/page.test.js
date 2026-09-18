@@ -187,6 +187,64 @@ module.exports = async function run(report) {
     await page.close();
   });
 
+  await test('marking a bill paid moves the money out of Bank today', async () => {
+    const page = await open();
+    await page.evaluate((d) => window.__seed('receipts', { rent: { date: d, vendor: 'Landlord', amountBase: 5000, paid: false, dueDate: d, status: 'business' } }), day(0, 15));
+    await page.waitForTimeout(300);
+    await page.fill('#bankInput', '10000'); await page.dispatchEvent('#bankInput', 'input'); await page.waitForTimeout(900);
+    const clean = t => t.replace(/[^0-9]/g, '');
+    assert.strictEqual(clean(await text(page, '#bankUnpaid')), '5000');
+    assert.strictEqual(clean(await text(page, '#bankFree')), '5000');
+    await page.click('[data-paid="rent"]');
+    await page.waitForTimeout(1400);
+    assert.strictEqual(await page.$eval('#bankInput', e => e.value), '5000', 'Bank today follows the payment');
+    assert.strictEqual(clean(await text(page, '#bankUnpaid')), '0');
+    assert.strictEqual(clean(await text(page, '#bankFree')), '5000', 'really yours does not jump');
+    const firstMonth = (await closing(page))[0].replace(/[^0-9-]/g, '');
+    assert.strictEqual(firstMonth, '5000');
+    await page.click('[data-paid="rent"]');
+    await page.waitForTimeout(1400);
+    assert.strictEqual(await page.$eval('#bankInput', e => e.value), '10000', 'unticking puts it back');
+    await page.close();
+  });
+
+  await test('an unpaid sale shows as outstanding, and receiving it moves it into the bank', async () => {
+    const page = await open();
+    await page.fill('#bankInput', '10000'); await page.dispatchEvent('#bankInput', 'input'); await page.waitForTimeout(900);
+    const clean = t => t.replace(/[^0-9]/g, '');
+    await page.fill('#saleClient', 'Client A');
+    await page.fill('#saleWhat', 'Two days of setup');
+    await page.fill('#saleAmt', '3000');
+    await page.fill('#saleDate', day(1, 10));
+    await page.click('#saleAdd');
+    await page.waitForTimeout(600);
+    const saved = await page.evaluate(() => Object.values(window.__store.receivables)[0]);
+    assert.strictEqual(saved.client, 'Client A');
+    assert.strictEqual(saved.amountBase, 3000);
+    assert.strictEqual(await page.$eval('#bankOwedCell', e => e.hidden), false, 'outstanding is shown');
+    assert.strictEqual(clean(await text(page, '#bankOwed')), '3000');
+    assert.strictEqual(clean(await text(page, '#bankFree')), '13000', 'really yours counts the invoice');
+    assert.strictEqual(await page.$eval('#bankInput', e => e.value), '10000', 'the bank is untouched while it is unpaid');
+    const rev = await page.$$eval('#cashTbody tr', rows => rows.slice(0, 2).map(r => r.children[1].textContent.replace(/[^0-9]/g, '')));
+    assert.deepStrictEqual(rev, ['0', '3000'], 'it lands in the month the money is expected');
+    await page.click('[data-owedpaid]');
+    await page.waitForTimeout(1400);
+    assert.strictEqual(await page.$eval('#bankInput', e => e.value), '13000', 'received money lands in Bank today');
+    assert.strictEqual(await page.$eval('#bankOwedCell', e => e.hidden), true, 'nothing outstanding any more');
+    assert.strictEqual(clean(await text(page, '#bankFree')), '13000');
+    assert.strictEqual(await page.$eval('#gotWrap', e => e.hidden), false, 'a received sale is still listed');
+    assert.match(await text(page, '#gotList'), /Client A/);
+    await page.click('[data-owedundo]');
+    await page.waitForTimeout(1400);
+    assert.strictEqual(await page.$eval('#bankInput', e => e.value), '10000', 'undo takes it out of the bank again');
+    assert.strictEqual(clean(await text(page, '#bankFree')), '13000');
+    await page.click('[data-owedremove]');
+    await page.waitForTimeout(600);
+    assert.match(await text(page, '#owedList'), /Nothing outstanding/);
+    assert.strictEqual(clean(await text(page, '#bankFree')), '10000', 'a removed sale counts nowhere');
+    await page.close();
+  });
+
   await test('a published page with a database can import a file from Claude', async () => {
     const page = await open();
     await page.fill('#impText', JSON.stringify({ format: 'business-runway', version: 1, config: { name: 'Chat Co', currency: 'DKK', locale: 'da-DK' },

@@ -237,6 +237,10 @@ module.exports = async function run(report) {
       .forEach(f => assert.ok(files[f], f + ' missing in zip'));
     assert.ok(files['business-runway/assets/business-runway.html'].toString() === PAGE, 'the page in the zip differs from business-runway.html');
     assert.ok(files['business-runway/assets/receipts-to-drive.gs'].toString() === fs.readFileSync(path.join(__dirname, '..', 'receipts-to-drive.gs'), 'utf8'), 'the script in the zip differs');
+    const license = fs.readFileSync(path.join(__dirname, '..', 'LICENSE'), 'utf8');
+    assert.ok(files['business-runway/LICENSE'] && files['business-runway/LICENSE'].toString() === license, 'LICENSE missing or different in the zip');
+    assert.ok(PAGE.startsWith('<!--') && PAGE.slice(0, 2500).includes(license.trim()), 'the page must start with the full MIT license comment');
+    assert.ok(fs.readFileSync(path.join(__dirname, '..', 'receipts-to-drive.gs'), 'utf8').slice(0, 3000).includes('Permission is hereby granted'), 'the script must carry the MIT license text');
     const desc = /description: (.*)/.exec(files['business-runway/SKILL.md'].toString());
     assert.ok(desc && desc[1].length <= 200, 'skill description must be 200 characters or less');
   });

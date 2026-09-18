@@ -1,3 +1,29 @@
+<!--
+Business Runway, a free Claude artifact by Brinvik (www.brinvik.com)
+Source: https://github.com/Brinvik/claude-artifact-business-runway
+
+MIT License
+
+Copyright (c) 2026 Kim Olsen (Brinvik)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
 <title>Business Runway artifact from Brinvik</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -529,6 +555,11 @@ input[type=text],input[type=month]{font-family:"IBM Plex Mono",monospace;font-si
 .datacol .ctl{margin-top:10px}
 .datacol textarea{width:100%;font-family:"IBM Plex Mono",monospace;font-size:12px;border:1px solid var(--line);border-radius:3px;padding:8px;background:var(--surface);color:var(--ink);resize:vertical}
 .dh{font-size:15px;margin:0 0 4px}
+.salebox{margin-top:18px;border-top:1px solid var(--line-soft);padding-top:14px}
+.duerow>span{min-width:0;flex-wrap:wrap}
+.salebox .ctl{min-width:0;max-width:100%}
+.salebox input,.salebox select{max-width:100%}
+@media(max-width:560px){.salebox .ctl{flex:1 1 100%}.salebox input,.salebox select{width:100%!important}}
 .btnrow{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
 .rampbtn.ghost{background:transparent}
 .impres{margin-top:12px;font-size:13px;line-height:1.5;border-left:3px solid var(--line);padding:6px 10px}
@@ -554,6 +585,11 @@ input[type=text],input[type=month]{font-family:"IBM Plex Mono",monospace;font-si
           <label class="eyebrow" for="bankInput">Bank today</label>
           <div class="bankedit"><input type="number" id="bankInput" step="100" value="0"><span id="curSym"></span></div>
           <div class="bankstamp" id="bankStamp">type what the account says</div>
+        </div>
+        <div class="bankop" id="bankOwedOp" hidden>+</div>
+        <div class="bankcell" id="bankOwedCell" hidden>
+          <div class="eyebrow">Outstanding</div>
+          <div class="bankv" id="bankOwed">0</div>
         </div>
         <div class="bankop">&minus;</div>
         <div class="bankcell">
@@ -749,11 +785,28 @@ input[type=text],input[type=month]{font-family:"IBM Plex Mono",monospace;font-si
     </div>
   </section>
 
-  <section class="panel" id="owedPanel" hidden>
-    <div class="panel-head"><div><h2>Money owed to you</h2>
-      <div class="panel-note">Invoices you have sent that are not paid yet. Each one is added to the cash chart in the month you expect it. Overdue ones are counted in the current month, so chase them. Invoices more than 60 days late are left out of the forecast until they are paid.</div></div></div>
+  <section class="panel" id="owedPanel">
+    <div class="panel-head"><div><h2>Sales and money owed to you</h2>
+      <div class="panel-note">Work you have sold and billed but not been paid for. Each one is added to the cash chart in the month you expect the money. Overdue ones count in the current month, so chase them. Anything more than 60 days late is left out of the forecast until it is paid. Press Received when the money lands and it moves into Bank today for you.</div></div></div>
     <div id="owedList"></div>
     <div class="tfoot"><span>Total owed</span><span><strong id="owedTotal"></strong></span></div>
+    <div id="gotWrap" style="margin-top:16px;border-top:1px solid var(--line-soft);padding-top:12px" hidden>
+      <div class="eyebrow">Money received: <span id="gotCount">0</span>, <span id="gotTotal"></span></div>
+      <div id="gotList" style="margin-top:8px"></div>
+    </div>
+    <div class="salebox">
+      <h3 class="dh">Add a sale</h3>
+      <div class="controls">
+        <div class="ctl" style="flex:1 1 200px"><label for="saleClient">Client</label><input type="text" id="saleClient" maxlength="80" placeholder="Client name" style="width:100%"></div>
+        <div class="ctl" style="flex:1 1 200px"><label for="saleWhat">What you sold</label><input type="text" id="saleWhat" maxlength="120" placeholder="Website agent, 2 days" style="width:100%"></div>
+        <div class="ctl"><label for="saleAmt">Amount landing in the bank</label><input type="number" id="saleAmt" min="0" step="500" style="width:150px"></div>
+        <div class="ctl"><label for="saleDate">Money expected</label><input type="date" id="saleDate" style="width:170px"></div>
+        <div class="ctl"><label for="salePaid">Already in the bank?</label>
+          <select id="salePaid"><option value="no">No, still waiting</option><option value="yes">Yes, it has landed</option></select></div>
+        <div class="ctl"><label>&nbsp;</label><button type="button" class="rampbtn" id="saleAdd">Add the sale</button></div>
+      </div>
+      <div class="small" id="saleNote" role="status" aria-live="polite"></div>
+    </div>
   </section>
 
   <section class="duestrip" id="dueStrip" hidden>
@@ -1032,7 +1085,7 @@ input[type=text],input[type=month]{font-family:"IBM Plex Mono",monospace;font-si
         base:base, cat:String(d.category||"Uncategorised"), vatBase:num(d.vatBase),
         who: d.status==="business" ? "Business" : (d.status==="private" ? "Private" : "Open"),
         open: d.status!=="business" && d.status!=="private",
-        paid: d.paid === true, due: String(d.dueDate||""), hasFile: d.hasFile === true, note: String(d.note||""),
+        paid: d.paid === true, paidAt: String(d.paidAt||""), due: String(d.dueDate||""), hasFile: d.hasFile === true, note: String(d.note||""),
         pre: !!(start && String(d.date||"9999") < start)
       });
     });
@@ -1040,8 +1093,16 @@ input[type=text],input[type=month]{font-family:"IBM Plex Mono",monospace;font-si
   }
   function unpaidRows(){ return allRows().filter(function(e){ return !e.paid && e.who !== "Private" && e.base > 0; }); }
   function unpaidTotal(){ return unpaidRows().reduce(function(a,e){ return a+e.base; },0); }
+  /* money invoiced and not paid yet. Counted apart from the bank, never inside it. */
+  function owedCounted(){ return owedRows().filter(function(o){ return !o.doubtful; }).reduce(function(a,o){ return a+o.amount; },0); }
   function CASH0(){ return num(PLAN.bank); }
-  function freeCash(){ return CASH0() - unpaidTotal(); }
+  function freeCash(){ return CASH0() + owedCounted() - unpaidTotal(); }
+  /* ticking a bill paid or a sale received moves the money in Bank today, so nobody has to retype it */
+  function adjustBank(delta){
+    if(!delta) return;
+    PLAN.bank = Math.round((num(PLAN.bank) + delta) * 100) / 100;
+    planToInputs(); refreshNumbers(); queueSave();
+  }
 
   /* unpaid bills by the month they hit the account. Overdue ones land in the current month. */
   function unpaidByMonth(){
@@ -1059,7 +1120,7 @@ input[type=text],input[type=month]{font-family:"IBM Plex Mono",monospace;font-si
   function owedRows(){
     var O = D().owed || {}, out = [];
     Object.keys(O).forEach(function(id){
-      var o = O[id]; if(!o || o.paid === true) return;
+      var o = O[id]; if(!o || o.paid === true || o.removed === true) return;
       var amt = Math.max(0, num(o.amountBase)); if(!amt) return;
       var exp = String(o.expectedDate || o.dueDate || "");
       out.push({id:id, client:String(o.client||""), desc:String(o.description||""), amount:amt, expected:exp,
@@ -1211,16 +1272,24 @@ input[type=text],input[type=month]{font-family:"IBM Plex Mono",monospace;font-si
 
   /* ================= header, KPIs, verdict ================= */
   function paintBank(){
-    var u = unpaidTotal(), f = freeCash(), rows = unpaidRows();
+    var u = unpaidTotal(), f = freeCash(), rows = unpaidRows(), owed = owedCounted();
     $("bankUnpaid").textContent = money(u);
+    $("bankOwed").textContent = money(owed);
+    $("bankOwedCell").hidden = $("bankOwedOp").hidden = !owed;
     $("bankFree").textContent = money(f);
     $("bankFree").className = "bankv" + (f < 0 ? " warnv" : "");
     $("curSym").textContent = BASE();
-    var note = $("bankNote");
-    if(!rows.length){ note.textContent = allRows().length ? "Nothing outstanding. Everything in the register is marked paid." : ""; return; }
-    var names = rows.sort(function(a,b){ return (a.due||"9999").localeCompare(b.due||"9999"); })
-      .slice(0,4).map(function(e){ return e.vendor + " " + money(e.base) + (e.due ? " due " + e.due : ""); });
-    note.textContent = rows.length + (rows.length===1?" bill":" bills") + " still to pay: " + names.join(", ") + (rows.length>4?", and more":"") + ".";
+    var note = $("bankNote"), bits = [];
+    if(rows.length){
+      var names = rows.sort(function(a,b){ return (a.due||"9999").localeCompare(b.due||"9999"); })
+        .slice(0,4).map(function(e){ return e.vendor + " " + money(e.base) + (e.due ? " due " + e.due : ""); });
+      bits.push(rows.length + (rows.length===1?" bill":" bills") + " still to pay: " + names.join(", ") + (rows.length>4?", and more":"") + ".");
+    } else if(allRows().length){
+      bits.push("Nothing outstanding. Everything in the register is marked paid.");
+    }
+    if(owed) bits.push("Outstanding is work you have billed and not been paid for. It is not in the bank yet.");
+    bits.push("Press Mark paid on a bill or Received on a sale and Bank today moves with it, so you never retype the balance yourself.");
+    note.textContent = bits.join(" ");
   }
   function paintKpis(){
     var biz = allRows().filter(function(e){ return e.who === "Business"; });
@@ -1371,8 +1440,11 @@ input[type=text],input[type=month]{font-family:"IBM Plex Mono",monospace;font-si
   function togglePaid(id){
     var d = D().receipts[id]; if(!d || busy["p:"+id]) return;
     if(!DEMO && !dbRef) return;
+    var nowPaid = d.paid !== true, amt = Math.max(0, num(d.amountBase));
+    var isBill = d.status !== "private";
     busy["p:"+id] = true;
-    write("receipts/"+id, {paid: d.paid !== true, paidAt: d.paid !== true ? new Date().toISOString() : null})
+    write("receipts/"+id, {paid: nowPaid, paidAt: nowPaid ? new Date().toISOString() : null})
+      .then(function(){ if(isBill && amt) adjustBank(nowPaid ? -amt : amt); })
       .catch(function(){}).then(function(){ delete busy["p:"+id]; });
   }
   $("dueList").addEventListener("click", function(e){ var b = e.target.closest("[data-paid]"); if(b) togglePaid(b.getAttribute("data-paid")); });
@@ -2085,25 +2157,99 @@ input[type=text],input[type=month]{font-family:"IBM Plex Mono",monospace;font-si
   $("demoOff").addEventListener("click", function(){ setDemo(false); });
 
   /* ================= money owed to you ================= */
+  function receivedRows(){
+    var O = D().owed || {}, out = [];
+    Object.keys(O).forEach(function(id){
+      var o = O[id]; if(!o || o.paid !== true || o.removed === true) return;
+      var amt = Math.max(0, num(o.amountBase)); if(!amt) return;
+      out.push({id:id, client:String(o.client||""), desc:String(o.description||""), amount:amt,
+                when:String(o.paidAt||"").slice(0,10) || String(o.expectedDate||"")});
+    });
+    return out.sort(function(a,b){ return b.when.localeCompare(a.when); });
+  }
+  function paintReceived(){
+    var rows = receivedRows(), wrap = $("gotWrap");
+    wrap.hidden = rows.length === 0;
+    if(!rows.length) return;
+    $("gotCount").textContent = rows.length;
+    $("gotTotal").textContent = money(rows.reduce(function(a,o){ return a+o.amount; },0));
+    $("gotList").innerHTML = rows.map(function(o){
+      return '<div class="duerow"><span><strong>'+esc(o.client||"Client")+'</strong> &middot; '+esc(o.desc)+'</span>'+
+        '<span style="display:flex;gap:14px;align-items:center"><span class="num">'+esc(money(o.amount))+'</span>'+
+        (o.when ? '<span class="paidbtn yes" style="cursor:default">RECEIVED '+esc(o.when)+'</span>' : '')+
+        '<button type="button" class="paidbtn" data-owedundo="'+esc(o.id)+'">Not yet after all</button>'+
+        '<button type="button" class="paidbtn" data-owedremove="'+esc(o.id)+'">Remove</button></span></div>';
+    }).join("");
+  }
+  $("gotList").addEventListener("click", function(e){
+    var u = e.target.closest("[data-owedundo]"), r = e.target.closest("[data-owedremove]");
+    var id = u ? u.getAttribute("data-owedundo") : (r ? r.getAttribute("data-owedremove") : null);
+    if(!id || busy["o:"+id] || (!DEMO && !dbRef)) return;
+    busy["o:"+id] = true;
+    var amt2 = Math.max(0, num((D().owed[id]||{}).amountBase));
+    write("receivables/"+id, u ? {paid:false, paidAt:null} : {removed:true, removedAt:new Date().toISOString()})
+      .then(function(){ if(u) adjustBank(-amt2); })
+      .catch(function(){}).then(function(){ delete busy["o:"+id]; });
+  });
   function paintOwed(){
     var rows = owedRows();
-    $("owedPanel").hidden = rows.length === 0;
     var counted = rows.filter(function(o){ return !o.doubtful; }).reduce(function(a,o){ return a+o.amount; },0);
     var doubt = rows.filter(function(o){ return o.doubtful; }).reduce(function(a,o){ return a+o.amount; },0);
     $("owedTotal").textContent = money(counted) + (doubt ? " counted, plus " + money(doubt) + " doubtful" : "");
-    $("owedList").innerHTML = rows.map(function(o){
+    paintReceived();
+    if(!rows.length){ $("owedList").innerHTML = '<div class="rstate">Nothing outstanding. Add a sale below and it lands in the month you expect the money.</div>'; }
+    else $("owedList").innerHTML = rows.map(function(o){
       return '<div class="duerow"><span><strong>'+esc(o.client||"Client")+'</strong> &middot; '+esc(o.desc)+'</span>'+
         '<span style="display:flex;gap:14px;align-items:center"><span class="num">'+esc(money(o.amount))+'</span>'+
         (o.expected ? '<span class="paidbtn '+(o.overdue?"due":"no")+'" style="cursor:default">'+(o.doubtful?"60+ DAYS LATE, NOT COUNTED ":(o.overdue?"OVERDUE ":"EXPECTED "))+esc(o.expected)+'</span>' : '')+
-        '<button type="button" class="paidbtn" data-owedpaid="'+esc(o.id)+'">Mark received</button></span></div>';
+        '<button type="button" class="paidbtn" data-owedpaid="'+esc(o.id)+'">Received</button>'+
+        '<button type="button" class="paidbtn" data-owedremove="'+esc(o.id)+'">Remove</button></span></div>';
     }).join("");
   }
+  function slug(t){ return String(t||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40); }
+  (function(){
+    var d = new Date(); d.setDate(d.getDate()+30);
+    $("saleDate").value = localISO(d);
+  })();
+  $("saleAdd").addEventListener("click", function(){
+    var client = $("saleClient").value.trim(), what = $("saleWhat").value.trim();
+    var amt = Math.max(0, num($("saleAmt").value)), when = $("saleDate").value;
+    var note = $("saleNote");
+    if(!client){ note.textContent = "Who is it for? Type a client name."; $("saleClient").focus(); return; }
+    if(!amt){ note.textContent = "How much lands in the bank? Type an amount."; $("saleAmt").focus(); return; }
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(when)){ note.textContent = "Pick the date you expect the money."; $("saleDate").focus(); return; }
+    if(!DEMO && !dbRef){ note.textContent = "The page cannot save yet. Try again in a moment."; return; }
+    var got = $("salePaid").value === "yes";
+    var id = (when + "-" + (slug(client) || "sale") + "-" + Math.random().toString(36).slice(2,6));
+    var doc = {client:client, description:what, amountBase:amt, expectedDate:when, paid:got, addedAt:new Date().toISOString()};
+    if(got) doc.paidAt = new Date().toISOString();
+    $("saleAdd").disabled = true;
+    write("receivables/"+id, doc, "set").then(function(){
+      if(got) adjustBank(amt);
+      note.textContent = got
+        ? "Added. " + money(amt) + " from " + client + " is counted on top of your bank figure until you type the new balance."
+        : "Added. " + money(amt) + " from " + client + " is in the forecast for " + when + ".";
+      $("saleClient").value = ""; $("saleWhat").value = ""; $("saleAmt").value = "";
+    }).catch(function(){ note.textContent = "That did not save. Try again."; })
+      .then(function(){ $("saleAdd").disabled = false; });
+  });
   $("owedList").addEventListener("click", function(e){
+    var rm = e.target.closest("[data-owedremove]");
+    if(rm){
+      var rid = rm.getAttribute("data-owedremove");
+      if(busy["o:"+rid] || (!DEMO && !dbRef)) return;
+      busy["o:"+rid] = true;
+      write("receivables/"+rid, {removed:true, removedAt:new Date().toISOString()}).catch(function(){}).then(function(){ delete busy["o:"+rid]; });
+      return;
+    }
     var b = e.target.closest("[data-owedpaid]"); if(!b) return;
     var id = b.getAttribute("data-owedpaid");
     if(busy["o:"+id] || (!DEMO && !dbRef)) return;
+    var amt = Math.max(0, num((D().owed[id]||{}).amountBase));
     busy["o:"+id] = true;
-    write("receivables/"+id, {paid:true, paidAt:new Date().toISOString()}).catch(function(){}).then(function(){ delete busy["o:"+id]; });
+    write("receivables/"+id, {paid:true, paidAt:new Date().toISOString()})
+      .then(function(){ adjustBank(amt); })
+      .catch(function(){}).then(function(){ delete busy["o:"+id]; });
   });
 
   /* ================= painting ================= */
